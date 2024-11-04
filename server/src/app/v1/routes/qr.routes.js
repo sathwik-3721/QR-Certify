@@ -1,15 +1,8 @@
-import { uploadData } from "../controllers/qr.controller.js"
+import { uploadData, getCertificate } from "../controllers/qr.controller.js"
 import express from 'express'
 import multer from 'multer'
-import fs from 'fs'
 
 const router = express.Router();
-
-const uploadFolder = './uploads';
-
-if (!fs.existsSync(uploadFolder)) {
-	fs.mkdirSync(uploadFolder);
-}
   
 const storage = multer.memoryStorage();
   
@@ -18,7 +11,9 @@ const upload = multer({
 	limits: { fileSize: 1024 * 1024 * 512 } 
 });
 
-router.route('/upload', upload.single('image'))
+router.route('/uploadData', upload.single('image'))
 	.post(uploadData);
+
+router.route('/getCertificate').get(getCertificate)
 
 export default router;

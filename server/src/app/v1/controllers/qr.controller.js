@@ -43,3 +43,19 @@ export const uploadData = [
         }
     }
 ];
+
+export async function getCertificate(req, res) {
+    try {
+        const { name, email } = req.query;
+        const result = await Qr.findOne({ name, email });
+        console.log('res', result);
+        res.status(StatusCodes.OK).send(result);
+    } catch(error) {
+        console.error("An error occurred in uploadData function:", error);
+        if (error.status) {
+            res.status(error.status).send(error.message);
+        } else {
+            res.status(StatusCodes.INTERNAL_SERVER_ERROR).send("An error occurred");
+        }
+    }
+}

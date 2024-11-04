@@ -20,6 +20,11 @@ const qrSchema = new mongoose.Schema({
     type: Buffer, // Use Buffer to store binary data like a Blob
     required: false,
   },
+  event: {
+    type: String,
+    required: true,
+    trim: true,
+  },
 });
 
 // Create a model from the schema
