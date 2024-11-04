@@ -1,4 +1,4 @@
-import { uploadData, getCertificate } from "../controllers/qr.controller.js"
+import { uploadData,getDetails,sendCertificate,test } from "../controllers/qr.controller.js"
 import express from 'express'
 import multer from 'multer'
 
@@ -14,6 +14,13 @@ const upload = multer({
 router.route('/uploadData', upload.single('image'))
 	.post(uploadData);
 
-router.route('/getCertificate').get(getCertificate)
+router.route('/sendCertificate')
+	.post(sendCertificate);
+
+router.route('/getDetails')
+	.get(getDetails)
+
+router.route("/test")
+	.get(test)
 
 export default router;

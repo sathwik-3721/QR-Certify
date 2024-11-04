@@ -4,22 +4,14 @@ import Aside from "./aside/Aside";
 import Footer from "./footer/Footer";
 import Header from "./header/Header";
 import QrGenerate from "@/components/QrGenerate";
+import QRCodeReader from "@/components/QRCodeReader";
 
 
-/**
- * layout component to generate our basic layout of our application
- * @returns {void}
- */
+
 function Layout() {
   const [expanded, setExpanded] = useState(false);
   return (
     <div className="h-full w-full flex transition-all">
-      {/* <Aside expanded={expanded} setExpanded={setExpanded} /> */}
-      <div
-        className={`${
-          expanded ? "sm:pl-44" : "sm:pl-16"
-        } flex flex-col h-full w-full p-4`}
-      >
         {/* <Header/> */}
         <div className={` h-full w-full `}>
           <Routes>
@@ -29,11 +21,15 @@ function Layout() {
                 <QrGenerate />
               }
             />
+            <Route
+              path="/scanner"
+              element={
+                <QRCodeReader />
+              }
+            />
             <Route path="/other" element={<div>other</div>} />
           </Routes>
         </div>
-       {/* <Footer/> */}
-      </div>
     </div>
   );
 }

@@ -30,6 +30,8 @@ try {
         DATABASE_PASSWORD: process.env.DATABASE_PASSWORD,
         DATABASE_NAME: process.env.DATABASE_NAME,
         MONGO_URI: process.env.MONGO_URI,
+        APP_MAIL_USER : process.env.APP_MAIL_USER,
+        APP_MAIL_PASSWORD : process.env.APP_MAIL_PASSWORD
     };
 } catch (error) {
     console.log(error);
