@@ -2,12 +2,8 @@ import { uploadData,getDetails,sendCertificate,test } from "../controllers/qr.co
 import express from 'express'
 const router = express.Router();
 
-const upload = multer({ 
-	storage: storage,
-	limits: { fileSize: 1024 * 1024 * 512 } 
-});
 
-router.route('/uploadData', upload.single('image'))
+router.route('/uploadData')
 	.post(uploadData);
 
 router.route('/sendCertificate')

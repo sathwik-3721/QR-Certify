@@ -4,7 +4,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Camera, AlertCircle, FileDown } from "lucide-react"
 import QrScanner from 'qr-scanner'
-import { Document, Page, Text, View, StyleSheet, PDFDownloadLink } from '@react-pdf/renderer'
+import { Document, Page, Text, View,Image, StyleSheet, PDFDownloadLink } from '@react-pdf/renderer'
+import API from '@/services/API'
 
 // Define styles for PDF
 const styles = StyleSheet.create({
@@ -26,6 +27,10 @@ const styles = StyleSheet.create({
     fontSize: 12,
     marginBottom: 5,
   },
+  image: {
+    width: 200, 
+    height: 200
+  }
 });
 
 // PDF Document component
@@ -36,7 +41,14 @@ const MyDocument = ({ data }) => (
         <Text style={styles.title}>Scanned QR Code Data</Text>
         <Text style={styles.content}>Name: {data.name}</Text>
         <Text style={styles.content}>Email: {data.email}</Text>
-        <Text style={styles.content}>Demo: {data.demo}</Text>
+        <Text style={styles.content}>Demo: {data.imageUrl}</Text>
+        <View style={styles.section}>
+        {data.imageUrl ? (
+          <Image style={styles.image} src={data.imageUrl} />
+        ) : (
+          <Text>No image available</Text>
+        )}
+      </View>
       </View>
     </Page>
   </Document>
@@ -48,6 +60,12 @@ export default function QRCodeReader() {
   const [isScanning, setIsScanning] = useState(false)
   const videoRef = useRef(null)
   const scannerRef = useRef(null)
+  const [details,setDetails] = useState({
+    name: '',
+    email: '',
+    demo: '',
+    imageUrl: ''
+  });
 
   useEffect(() => {
     return () => {
@@ -57,13 +75,35 @@ export default function QRCodeReader() {
     }
   }, [])
 
+  // Function to convert ArrayBuffer to Base64
+const arrayBufferToBase64 = (buffer) => {
+  let binary = '';
+  const bytes = new Uint8Array(buffer);
+  const len = bytes.byteLength;
+  for (let i = 0; i < len; i++) {
+    binary += String.fromCharCode(bytes[i]);
+  }
+  return window.btoa(binary);
+};
+
+  const handlePdfGeneration = async () => {
+    const result = await API.get.getDetails();
+    console.log(result)
+    // const blob = new Blob([result.image.data], { type: 'image/jpeg' });
+
+    // // Create a Blob URL and set it as the src for the image
+    // const imageUrl = URL.createObjectURL(blob);
+    // console.log(imageUrl)
+    // setDetails({...result,imageUrl : imageUrl});
+  }
+
   const startScanning = async () => {
     setError(null)
     setScannedData(null)
     setIsScanning(true)
 
     try {
-      if (!videoRef.current) return
+      if (!videoRef.current) return;
 
       scannerRef.current = new QrScanner(
         videoRef.current,
@@ -122,7 +162,17 @@ export default function QRCodeReader() {
             </Alert>
           )}
 
-          {scannedData && (
+          {details && (
+            <Alert>
+              <AlertTitle>Scanned Data</AlertTitle>
+              <AlertDescription>
+                <p>Name: {details.name}</p>
+                <p>Email: {details.email}</p>
+                <p>Demo: {details.demo}</p>
+              </AlertDescription>
+            </Alert>
+          )}
+          {/* {scannedData && (
             <Alert>
               <AlertTitle>Scanned Data</AlertTitle>
               <AlertDescription>
@@ -131,7 +181,7 @@ export default function QRCodeReader() {
                 <p>Demo: {scannedData.demo}</p>
               </AlertDescription>
             </Alert>
-          )}
+          )} */}
 
           <Button 
             onClick={isScanning ? stopScanning : startScanning} 
@@ -140,7 +190,7 @@ export default function QRCodeReader() {
             {isScanning ? 'Stop Scanning' : 'Start Scanning'}
           </Button>
 
-          {scannedData && (
+          {/* {scannedData && (
             <PDFDownloadLink
               document={<MyDocument data={scannedData} />}
               fileName="scanned_qr_data.pdf"
@@ -155,8 +205,28 @@ export default function QRCodeReader() {
                 </Button>
               )}
             </PDFDownloadLink>
+          )} */}
+
+
+          {details.demo !== '' && (
+            <PDFDownloadLink
+              document={<MyDocument data={details} />}
+              fileName="scanned_qr_data.pdf"
+            >
+              {({ blob, url, loading, error }) => (
+                <Button 
+                  className="w-full bg-[#2368a0] hover:bg-[#1c5280] text-white"
+                  disabled={loading}
+                >
+                  {loading ? 'Generating PDF...' : 'Download PDF'}
+                  <FileDown className="ml-2 h-4 w-4" />
+                </Button>
+              )}
+            </PDFDownloadLink>
           )}
+
         </CardContent>
+        <Button onClick={handlePdfGeneration}>Generate Pdf</Button>
       </Card>
     </div>
   )

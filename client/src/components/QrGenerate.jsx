@@ -5,16 +5,21 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { QRCodeSVG } from 'qrcode.react';
+import API from '@/services/API';
 
 export default function QrGenerate() {
   const [formData, setFormData] = useState({
     name: '',
-    demo: 'demo1',
+    demo: '',
     email: '',
-    profilePicture: null,
+    image: null,
   });
   const [qrCodeData, setQRCodeData] = useState('');
   const fileInputRef = useRef(null);
+  const [error,setError] = useState(null);
+  const [image,setImage] = useState(null)
+  const [imgUrl,setImgUrl] = useState("")
+  const [uploadedImage,setUploadedImage] = useState(null);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -28,19 +33,48 @@ export default function QrGenerate() {
   const handleFileChange = (e) => {
     const file = e.target.files?.[0];
     if (file) {
+      setFormData(prev => ({ ...prev, profilePicture: file })); // Store file in formData
       const reader = new FileReader();
       reader.onloadend = () => {
-        setFormData(prev => ({ ...prev, profilePicture: reader.result }));
+        setUploadedImage(reader.result);
       };
       reader.readAsDataURL(file);
     }
   };
 
-  const handleSubmit = (e) => {
+  const createFormData = () => {
+    const data = new FormData(); // Create a new FormData instance
+  
+    // Append each form field to the FormData object
+    data.append('name', formData.name); // Append 'name'
+    data.append('demo', formData.demo); // Append 'demo'
+    data.append('email', formData.email); // Append 'email'
+  
+    // Check if profilePicture is not null, then append it
+    if (formData.profilePicture) {
+      data.append('image', formData.profilePicture); // Append the file (profilePicture)
+    }
+  
+    return data; // Return the FormData object
+  };
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    let { profilePicture, ...rest } = formData;
-    const dataString = JSON.stringify(rest);
-    setQRCodeData(dataString);
+    try{
+      const data = createFormData();
+      console.log(data)
+      const result = await API.post.register(data);
+      console.log(result)
+      // setImgUrl(result.newQr.image.data)
+      let { profilePicture, ...rest } = formData;
+      const dataString = JSON.stringify(rest);
+      // setQRCodeData(dataString);
+    }
+    catch(err){
+      setError(err)
+      console.log(err)
+    }
+    
   };
 
   return (
@@ -72,9 +106,10 @@ export default function QrGenerate() {
                   <SelectValue placeholder="Select a demo" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="demo1">Demo 1</SelectItem>
-                  <SelectItem value="demo2">Demo 2</SelectItem>
-                  <SelectItem value="demo3">Demo 3</SelectItem>
+                  <SelectItem value="Tech Talks">Tech Talks</SelectItem>
+                  <SelectItem value="Hands on">Hands on</SelectItem>
+                  <SelectItem value="Demos">Demos</SelectItem>
+                  <SelectItem value="Quiz">Quiz</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -111,7 +146,7 @@ export default function QrGenerate() {
               {formData.profilePicture && (
                 <div className="mt-2 flex justify-center">
                   <img 
-                    src={formData.profilePicture} 
+                    src={uploadedImage} 
                     alt="Profile" 
                     className="w-32 h-32 object-cover rounded-full border-4 border-[#00aae7]"
                   />
@@ -136,6 +171,10 @@ export default function QrGenerate() {
               />
             </div>
           )}
+          {
+            error && <p className='text-red-500'>Error sending data</p>
+          }
+          {image &&  <img src={imgUrl} /> }
         </CardFooter>
       </Card>
     </div>

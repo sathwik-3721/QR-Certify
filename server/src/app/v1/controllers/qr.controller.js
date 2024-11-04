@@ -3,22 +3,25 @@ import config from "../../../../../config.js";
 // import Qr from "../models/qr.model.js";
 import { StatusCodes } from 'http-status-codes';
 import nodemailer from 'nodemailer'
+import multer from "multer";
 
+const storage = multer.memoryStorage();
 
-import multer from 'multer';
-
-// Configure multer
-const upload = multer();
+const upload = multer({ 
+	storage: storage,
+	limits: { fileSize: 1024 * 1024 * 512 } 
+});
 
 // Middleware to handle file uploads
 export const uploadData = [
     upload.single('image'), // This will process the image field from the form data
     async (req, res) => {
         try {
-            const { name, email } = req.body; // Get name and email from body
+            const { name, email,event } = req.body; // Get name and email from body
             const imageBuffer = req.file?.buffer; // Get the image buffer from multer
 
             // Debugging output
+            console.log(Object.keys(req))
             console.log("Received Name:", name);
             console.log("Received Email:", email);
             console.log("Received Image Buffer:", imageBuffer);
@@ -28,14 +31,14 @@ export const uploadData = [
             }
 
             // Create a new document with the parsed data
-            const newQr = new Qr({
-                name,
-                email,
-                image: imageBuffer,
-            });
+            // const newQr = new Qr({
+            //     name,
+            //     email,
+            //     image: imageBuffer,
+            // });
 
-            await newQr.save(); // Save the document to MongoDB
-            return res.status(StatusCodes.OK).send({ message: 'Data uploaded successfully', newQr });
+            // await newQr.save(); // Save the document to MongoDB
+            return res.status(StatusCodes.OK).send({ message: 'Data uploaded successfully', imageBuffer });
         } catch (error) {
             console.error("An error occurred in uploadData function:", error);
             if (error.status) {
@@ -142,8 +145,18 @@ export async function getDetails(req, res) {
     try {
         const { name, email } = req.query;
         const result = await Qr.findOne({ name, email });
-        console.log('res', result);
-        res.status(StatusCodes.OK).send(result);
+        if (result && result.image && result.image.data) {
+            const base64Image = Buffer.from(result.image.data).toString('base64');
+            const imgSrc = `data:image/jpeg;base64,${base64Image}`;
+            
+            // Send the modified response with the base64 string
+            return res.status(StatusCodes.OK).send({
+                ...result._doc,  // Spread other fields (name, email)
+                image: imgSrc,  // Replace the buffer with the base64 string
+            });
+        } else {
+            return res.status(StatusCodes.NOT_FOUND).send('No data found');
+        }
     } catch(error) {
         console.error("An error occurred in uploadData function:", error);
         if (error.status) {

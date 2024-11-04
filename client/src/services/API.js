@@ -1,21 +1,32 @@
 import axios from "axios";
+const URL = import.meta.env.VITE_URL;
 export default {
-  get: {
-    fakeProducts: () => {
-      return axios.get("https://fakestoreapi.com/products/1");
-    },
-  },
   post: {
-    fakeProduct: (body) => {
-      return axios.post("https://fakestoreapi.com/products", body);
+    register: async (data) => {
+      try{
+        const response = await axios.post(`${URL}/uploadData`, data,{
+          headers : {
+            'Content-Type': 'multipart/form-data',
+          }
+        });
+
+        return response.data;
+      }
+      catch(err){
+        throw err;
+      } 
     },
   },
-  put: {
-    fakeProduct: (body) => {
-      return axios.put("https://fakestoreapi.com/products/7", body);
-    },
-  },
-  delete: {
-    fakeProduct: () => axios.delete("https://fakestoreapi.com/products/6"),
-  },
+  get : {
+    getDetails : async () => {
+      try{
+        const response = await axios.get(`${URL}/getCertificate?name=Rev&email=emauil`);
+        return response.data;
+      }
+      catch(err){
+        throw err;
+      } 
+    }
+  }
+
 };
