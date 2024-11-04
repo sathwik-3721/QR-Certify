@@ -9,7 +9,7 @@ import { QRCodeSVG } from 'qrcode.react';
 export default function QrGenerate() {
   const [formData, setFormData] = useState({
     name: '',
-    demo: 'demo1',
+    demo: '',
     email: '',
     profilePicture: null,
   });
@@ -72,9 +72,10 @@ export default function QrGenerate() {
                   <SelectValue placeholder="Select a demo" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="demo1">Demo 1</SelectItem>
-                  <SelectItem value="demo2">Demo 2</SelectItem>
-                  <SelectItem value="demo3">Demo 3</SelectItem>
+                  <SelectItem value="Tech Talks">Tech Talks</SelectItem>
+                  <SelectItem value="Hands on">Hands on</SelectItem>
+                  <SelectItem value="Demos">Demos</SelectItem>
+                  <SelectItem value="Quiz">Quiz</SelectItem>
                 </SelectContent>
               </Select>
             </div>
