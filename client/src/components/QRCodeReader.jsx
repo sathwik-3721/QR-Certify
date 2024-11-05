@@ -6,6 +6,7 @@ import { Camera, AlertCircle, FileDown } from "lucide-react"
 import QrScanner from 'qr-scanner'
 import { Document, Page, Text, View,Image, StyleSheet, PDFDownloadLink } from '@react-pdf/renderer'
 import API from '@/services/API'
+import { Loader2,Check,CircleX  } from "lucide-react"
 
 const styles = StyleSheet.create({
   page: {
@@ -102,6 +103,7 @@ export default function QRCodeReader() {
   const [isScanning, setIsScanning] = useState(false)
   const videoRef = useRef(null)
   const scannerRef = useRef(null)
+  const [fetchingState,setFetchingState] = useState('')
   const [details,setDetails] = useState({
     "_id":"",
     name: '',
@@ -120,33 +122,45 @@ export default function QRCodeReader() {
 
   const handlePdfGeneration = async (userData) => {
     // window.alert("hello")
+    try{
+    setFetchingState('fetching details...');
     const result = await API.get.getDetails(userData);
     console.log(result)
     window.alert(result.email)
     // sendPDFToBackend()
     setDetails(result);
+    setFetchingState('')
+    }
+    catch(err){
+      console.log(err);
+      setFetchingState("Failed to fetch Details");
+    }
   }
 
   const sendPDFToBackend = async (pdfBlob) => {
-    if (pdfBlob instanceof Blob){
-    console.log('Valid Blob:', pdfBlob);
-    const formData = new FormData();
-    formData.append("email",details.email);
-    formData.append('pdf', pdfBlob, 'certificate.pdf');
-  
-    // // const response = await fetch('/api/send-pdf', {
-    // //   method: 'POST',
-    // //   body: formData,
-    // // });
-
-    const response = await API.post.sendCertificate(formData);
-  
-    if (response.ok) {
-      console.log('PDF sent to backend successfully!');
-    } else {
-      console.error('Error sending PDF to backend');
+    try{
+      if (pdfBlob instanceof Blob){
+        setFetchingState('sending certificate')
+        console.log('Valid Blob:', pdfBlob);
+        const formData = new FormData();
+        formData.append("email",details.email);
+        formData.append('pdf', pdfBlob, 'certificate.pdf');
+      
+        // // const response = await fetch('/api/send-pdf', {
+        // //   method: 'POST',
+        // //   body: formData,
+        // // });
+        const response = await API.post.sendCertificate(formData);
+        setFetchingState("Mail sent successfully");
+      }
     }
-  }
+    catch(err){
+      console.log(err);
+      setFetchingState("Failed to send mail");
+    }
+    finally{
+      setIsLoading('');
+    }
   };
 
   const startScanning = async () => {
@@ -259,14 +273,27 @@ export default function QRCodeReader() {
               {({ blob, url, loading, error }) => {
                 if (!loading && blob) {
                   sendPDFToBackend(blob);
-                  return <Button>Download</Button>
+                  return <Button>download</Button>
                 }
               }}
             </PDFDownloadLink>
           )}
           {details.image !== '' && <img src={details.image} />}
+
+        {
+          fetchingState.includes("fetching") ? <div className='text-blue-600 bg-blue-300 flex p-2 items-center justify-center rounded-md'><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Fetching details...</div> : null 
+        }
+        {
+          fetchingState.includes("sending") ? <div className='text-blue-600 bg-blue-300 flex p-2 items-center justify-center rounded-md'><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Sending Mail...</div> : null
+        }
+        {
+          fetchingState.includes("fail") ? <div className='text-red-600 bg-red-300 rounded-md flex p-2 items-center justify-center'><CircleX className="mr-2 h-4 w-4" /> Failed to send Mail</div> : null
+        }
+        {
+          fetchingState.includes("success") ? <div className='text-green-600 bg-green-200 rounded-md flex p-2 items-center justify-center'><Check className="mr-2 h-4 w-4" /> Mail send successfully</div> : null
+        }
         </CardContent>
-        <Button onClick={handlePdfGeneration}>Generate Pdf</Button>
+
       </Card>
     </div>
   )

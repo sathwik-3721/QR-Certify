@@ -177,7 +177,7 @@ export default function QrGenerate() {
               </div>
               {
                 isLoading
-                ? <Button disabled>
+                ? <Button className="w-full bg-[#00aae7]" disabled>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                     Please wait
                   </Button>
