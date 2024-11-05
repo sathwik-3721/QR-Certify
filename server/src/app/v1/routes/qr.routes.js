@@ -1,9 +1,8 @@
 import { uploadData,getDetails,sendCertificate,test } from "../controllers/qr.controller.js"
 import express from 'express'
-import multer from 'multer'
+// import multer from 'multer'
 
 const router = express.Router();
-
 
 router.route('/uploadData')
 	.post(uploadData);

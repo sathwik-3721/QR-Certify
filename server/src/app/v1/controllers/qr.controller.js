@@ -1,6 +1,7 @@
-import logger from "../../../../../logger.js";
+// import logger from "../../../../../logger.js";
 import config from "../../../../../config.js";
 // import Qr from "../models/qr.model.js";
+import Qr from "../models/qr.model.js";
 import { StatusCodes } from 'http-status-codes';
 import nodemailer from 'nodemailer'
 import multer from "multer";
