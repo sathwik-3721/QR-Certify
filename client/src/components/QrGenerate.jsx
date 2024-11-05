@@ -1,5 +1,6 @@
 import React, { useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
+import { Loader2 } from "lucide-react"
 import {
   Card,
   CardContent,
@@ -30,6 +31,7 @@ export default function QrGenerate() {
   const fileInputRef = useRef(null);
   const [error, setError] = useState(null);
   const [uploadedImage, setUploadedImage] = useState(null);
+  const [isLoading,setIsLoading] = useState(false)
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -55,7 +57,7 @@ export default function QrGenerate() {
     e.preventDefault();
     try {
       // const data = createFormData();
-      console.log(formData);
+      setIsLoading(true);
       const result = await API.post.register(formData);
       console.log(result);
       setUploadedImage(result.newQr.image);
@@ -66,6 +68,9 @@ export default function QrGenerate() {
     } catch (err) {
       setError(err);
       console.log(err);
+    }
+    finally{
+      setIsLoading(false);
     }
   };
 
@@ -170,12 +175,20 @@ export default function QrGenerate() {
                   </div>
                 )}
               </div>
-              <Button
-                type="submit"
-                className="w-full bg-[#00aae7] hover:bg-[#0088b9] text-white"
-              >
-                Generate QR Code
-              </Button>
+              {
+                isLoading
+                ? <Button disabled>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Please wait
+                  </Button>
+                : <Button
+                    type="submit"
+                    className="w-full bg-[#00aae7] hover:bg-[#0088b9] text-white"
+                  >
+                    Generate QR Code
+                  </Button>
+              }
+              
             </form>
           )}
         </CardContent>
