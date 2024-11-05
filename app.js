@@ -25,7 +25,7 @@ const requestLoggerMiddleware = (req, res, next) => {
       method: req.method,
       path: req.path,
       query: req.query,
-      body: req.body,
+      // body: req.body,
       ip: req.ip,
       userAgent: req.get('user-agent'),
       status: status,

@@ -17,7 +17,7 @@ const qrSchema = new mongoose.Schema({
     trim: true,
   },
   image: {
-    type: Buffer, // Use Buffer to store binary data like a Blob
+    type: String, // Use Buffer to store binary data like a Blob
     required: false,
   },
   event: {
@@ -26,5 +26,9 @@ const qrSchema = new mongoose.Schema({
     trim: true,
   },
 });
+
+
+// Create a model from the schema
+const Qr = mongoose.model('Qr', qrSchema);
 
 export default Qr;

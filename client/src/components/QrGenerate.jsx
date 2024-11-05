@@ -5,16 +5,19 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { QRCodeSVG } from 'qrcode.react';
+import API from '@/services/API';
 
 export default function QrGenerate() {
   const [formData, setFormData] = useState({
     name: '',
-    demo: '',
+    event: '',
     email: '',
-    profilePicture: null,
+    image: '',
   });
   const [qrCodeData, setQRCodeData] = useState('');
   const fileInputRef = useRef(null);
+  const [error,setError] = useState(null);
+  const [uploadedImage,setUploadedImage] = useState(null);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -22,7 +25,7 @@ export default function QrGenerate() {
   };
 
   const handleSelectChange = (value) => {
-    setFormData(prev => ({ ...prev, demo: value }));
+    setFormData(prev => ({ ...prev, event: value }));
   };
 
   const handleFileChange = (e) => {
@@ -30,17 +33,31 @@ export default function QrGenerate() {
     if (file) {
       const reader = new FileReader();
       reader.onloadend = () => {
-        setFormData(prev => ({ ...prev, profilePicture: reader.result }));
+        setFormData(prev => ({ ...prev, image: reader.result }));
       };
       reader.readAsDataURL(file);
     }
   };
 
-  const handleSubmit = (e) => {
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    let { profilePicture, ...rest } = formData;
-    const dataString = JSON.stringify(rest);
-    setQRCodeData(dataString);
+    try{
+      // const data = createFormData();
+      console.log(formData)
+      const result = await API.post.register(formData);
+      console.log(result)
+      setUploadedImage(result.newQr.image);
+      // setImgUrl(result.newQr.image.data)
+      let { image, ...rest } = formData;
+      const dataString = JSON.stringify(rest);
+      setQRCodeData(dataString);
+    }
+    catch(err){
+      setError(err)
+      console.log(err)
+    }
+    
   };
 
   return (
@@ -65,11 +82,11 @@ export default function QrGenerate() {
             <div className="space-y-2">
               <Label htmlFor="demo" className="text-gray-700">Demo</Label>
               <Select 
-                value={formData.demo} 
+                value={formData.event} 
                 onValueChange={handleSelectChange}
               >
-                <SelectTrigger id="demo" className="border-gray-300 focus:border-[#00aae7] focus:ring-[#00aae7]">
-                  <SelectValue placeholder="Select a demo" />
+                <SelectTrigger id="event" className="border-gray-300 focus:border-[#00aae7] focus:ring-[#00aae7]">
+                  <SelectValue placeholder="Select a event" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="Tech Talks">Tech Talks</SelectItem>
@@ -109,10 +126,10 @@ export default function QrGenerate() {
               >
                 Upload Profile Picture
               </Button>
-              {formData.profilePicture && (
+              {formData.image !== '' && (
                 <div className="mt-2 flex justify-center">
                   <img 
-                    src={formData.profilePicture} 
+                    src={formData.image} 
                     alt="Profile" 
                     className="w-32 h-32 object-cover rounded-full border-4 border-[#00aae7]"
                   />
@@ -137,6 +154,9 @@ export default function QrGenerate() {
               />
             </div>
           )}
+          {
+            error && <p className='text-red-500'>Error sending data</p>
+          }
         </CardFooter>
       </Card>
     </div>

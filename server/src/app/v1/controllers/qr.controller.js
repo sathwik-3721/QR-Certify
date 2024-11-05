@@ -3,35 +3,32 @@ import config from "../../../../../config.js";
 // import Qr from "../models/qr.model.js";
 import { StatusCodes } from 'http-status-codes';
 import nodemailer from 'nodemailer'
+import multer from "multer";
 
+const storage = multer.memoryStorage();
 
-import multer from 'multer';
-
-// Configure multer
-const upload = multer();
+const upload = multer({ 
+	storage: storage,
+	limits: { fileSize: 1024 * 1024 * 512 } 
+});
 
 // Middleware to handle file uploads
-export const uploadData = [
-    upload.single('image'), // This will process the image field from the form data
-    async (req, res) => {
+export const uploadData = async (req, res) => {
         try {
-            const { name, email } = req.body; // Get name and email from body
-            const imageBuffer = req.file?.buffer; // Get the image buffer from multer
+            const { name, email,event,image } = req.body; // Get name and email from body
 
             // Debugging output
+            console.log(Object.keys(req))
             console.log("Received Name:", name);
             console.log("Received Email:", email);
-            console.log("Received Image Buffer:", imageBuffer);
+            console.log("Received event:", event);
+            // console.log("Received Image Buffer:", image);
 
-            if (!imageBuffer) {
-                return res.status(StatusCodes.BAD_REQUEST).send("Image is required");
-            }
-
-            // Create a new document with the parsed data
             const newQr = new Qr({
                 name,
                 email,
-                image: imageBuffer,
+                event,
+                image,
             });
 
             await newQr.save(); // Save the document to MongoDB
@@ -45,10 +42,13 @@ export const uploadData = [
             }
         }
     }
-];
 
+export const sendCertificate = [
+  upload.single("pdf"),
+  (req,res) => {
 
-export async function sendCertificate(req,res) {
+    const pdfBuffer = req.file.buffer; // Access the uploaded PDF file in memory
+    const fileName = req.file.originalname; // Get the original filename
 
     const html = `<!DOCTYPE html>
 <html lang="en">
@@ -112,9 +112,8 @@ export async function sendCertificate(req,res) {
         html,
         attachments: [
             {
-              filename: 'ParticipationCertificate.pdf', // Name the file
-              path: 'C:\\Users\\rlanka1\\Desktop\\QR-Certify\\Warranty10.pdf', // Absolute or relative path to the file
-              contentType: 'application/pdf' // Optional, automatically set by Nodemailer
+              filename: fileName, // Name the file
+              content:pdfBuffer
             }
           ]
       };
@@ -138,13 +137,14 @@ export async function sendCertificate(req,res) {
     });
 
 }
+]
 
 export async function getDetails(req, res) {
     try {
-        const { name, email } = req.query;
-        const result = await Qr.findOne({ name, email });
-        console.log('res', result);
-        res.status(StatusCodes.OK).send(result);
+        const { name, email,event } = req.query;
+        const result = await Qr.findOne({ name, email, event });
+        console.log(result)
+        return res.send(result)
     } catch(error) {
         console.error("An error occurred in uploadData function:", error);
         if (error.status) {

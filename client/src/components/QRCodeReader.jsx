@@ -4,7 +4,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Camera, AlertCircle, FileDown } from "lucide-react"
 import QrScanner from 'qr-scanner'
-import { Document, Page, Text, View, StyleSheet, PDFDownloadLink } from '@react-pdf/renderer'
+import { Document, Page, Text, View,Image, StyleSheet, PDFDownloadLink } from '@react-pdf/renderer'
+import API from '@/services/API'
 
 // Define styles for PDF
 const styles = StyleSheet.create({
@@ -26,6 +27,10 @@ const styles = StyleSheet.create({
     fontSize: 12,
     marginBottom: 5,
   },
+  image: {
+    width: 200, 
+    height: 200
+  }
 });
 
 // PDF Document component
@@ -36,7 +41,14 @@ const MyDocument = ({ data }) => (
         <Text style={styles.title}>Scanned QR Code Data</Text>
         <Text style={styles.content}>Name: {data.name}</Text>
         <Text style={styles.content}>Email: {data.email}</Text>
-        <Text style={styles.content}>Demo: {data.demo}</Text>
+        <Text style={styles.content}>Demo: {data.event}</Text>
+        <View style={styles.section}>
+        {data.image ? (
+          <Image style={styles.image} src={data.image} />
+        ) : (
+          <Text>No image available</Text>
+        )}
+      </View>
       </View>
     </Page>
   </Document>
@@ -48,6 +60,13 @@ export default function QRCodeReader() {
   const [isScanning, setIsScanning] = useState(false)
   const videoRef = useRef(null)
   const scannerRef = useRef(null)
+  const [details,setDetails] = useState({
+    "_id":"",
+    name: '',
+    email: '',
+    event: '',
+    image: ''
+  });
 
   useEffect(() => {
     return () => {
@@ -57,19 +76,45 @@ export default function QRCodeReader() {
     }
   }, [])
 
+  const handlePdfGeneration = async (userData) => {
+    const result = await API.get.getDetails(userData);
+    console.log(result)
+    setDetails(result);
+  }
+
+  const sendPDFToBackend = async (pdfBlob) => {
+    console.log(pdfBlob)
+    // const formData = new FormData();
+    // formData.append('pdf', pdfBlob, 'certificate.pdf');
+  
+    // // const response = await fetch('/api/send-pdf', {
+    // //   method: 'POST',
+    // //   body: formData,
+    // // });
+
+    // const response = await API.post.sendCertificate(formData);
+  
+    // if (response.ok) {
+    //   console.log('PDF sent to backend successfully!');
+    // } else {
+    //   console.error('Error sending PDF to backend');
+    // }
+  };
+
   const startScanning = async () => {
     setError(null)
     setScannedData(null)
     setIsScanning(true)
 
     try {
-      if (!videoRef.current) return
+      if (!videoRef.current) return;
 
       scannerRef.current = new QrScanner(
         videoRef.current,
         (result) => {
           try {
-            const parsedData = JSON.parse(result.data)
+            const parsedData = JSON.parse(result.data);
+            handlePdfGeneration(parsedData)
             setScannedData(parsedData)
           } catch (err) {
             setError('Invalid QR code data format')
@@ -128,7 +173,7 @@ export default function QRCodeReader() {
               <AlertDescription>
                 <p>Name: {scannedData.name}</p>
                 <p>Email: {scannedData.email}</p>
-                <p>Demo: {scannedData.demo}</p>
+                <p>Demo: {scannedData.event}</p>
               </AlertDescription>
             </Alert>
           )}
@@ -140,7 +185,7 @@ export default function QRCodeReader() {
             {isScanning ? 'Stop Scanning' : 'Start Scanning'}
           </Button>
 
-          {scannedData && (
+          {/* {scannedData && (
             <PDFDownloadLink
               document={<MyDocument data={scannedData} />}
               fileName="scanned_qr_data.pdf"
@@ -155,8 +200,26 @@ export default function QRCodeReader() {
                 </Button>
               )}
             </PDFDownloadLink>
+          )} */}
+
+
+          {scannedData && (
+            <PDFDownloadLink
+              document={<MyDocument data={details} />}
+              fileName="certificate.pdf"
+            >
+              {({ blob, url, loading, error }) => {
+                if (!loading) {
+                  
+                  sendPDFToBackend(blob);
+                }
+                // return <></>
+              }}
+            </PDFDownloadLink>
           )}
+
         </CardContent>
+        {/* <Button onClick={handlePdfGeneration}>Generate Pdf</Button> */}
       </Card>
     </div>
   )

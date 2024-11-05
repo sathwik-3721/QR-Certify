@@ -18,10 +18,7 @@
     "mongoose": "^8.8.0",
     "moongoose": "^0.0.5",
     "multer": "^1.4.5-lts.1",
-<<<<<<< HEAD
-=======
     "nodemailer": "^6.9.16",
->>>>>>> 862c403751d05008db5ba6b73d40385e95d1f80c
     "nodemon": "^3.1.7",
     "passport": "^0.7.0",
     "passport-jwt": "^4.0.0",

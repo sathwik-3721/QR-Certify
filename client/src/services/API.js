@@ -1,21 +1,38 @@
 import axios from "axios";
+// const URL = import.meta.env.VITE_URL;
+const URL = "http://localhost:8000/v1/api"
+console.log(URL)
 export default {
-  get: {
-    fakeProducts: () => {
-      return axios.get("https://fakestoreapi.com/products/1");
-    },
-  },
   post: {
-    fakeProduct: (body) => {
-      return axios.post("https://fakestoreapi.com/products", body);
+    register: async (data) => {
+      try{
+        const response = await axios.post(`${URL}/uploadData`, data);
+        return response.data;
+      }
+      catch(err){
+        throw err;
+      } 
     },
+    sendCertificate : async (data) => {
+      try{
+        const response = await axios.post(`${URL}/sendCerificate`, data);
+        return response.data;
+      }
+      catch(err){
+        throw err;
+      } 
+    }
   },
-  put: {
-    fakeProduct: (body) => {
-      return axios.put("https://fakestoreapi.com/products/7", body);
-    },
-  },
-  delete: {
-    fakeProduct: () => axios.delete("https://fakestoreapi.com/products/6"),
-  },
+  get : {
+    getDetails : async (userData) => {
+      try{
+        const response = await axios.get(`${URL}/getDetails?name=${userData.name}&email=${userData.email}&event=${userData.event}`);
+        return response.data;
+      }
+      catch(err){
+        throw err;
+      } 
+    }
+  }
+
 };
