@@ -15,7 +15,7 @@ export default {
     },
     sendCertificate : async (data) => {
       try{
-        const response = await axios.post(`${URL}/sendCerificate`, data);
+        const response = await axios.post(`${URL}/sendCertificate`, data);
         return response.data;
       }
       catch(err){
@@ -26,6 +26,7 @@ export default {
   get : {
     getDetails : async (userData) => {
       try{
+        // const response = await axios.get(`${URL}/getDetails?name=Revanth&email=revathipathilanka347@gmail.com&event=Demos`);
         const response = await axios.get(`${URL}/getDetails?name=${userData.name}&email=${userData.email}&event=${userData.event}`);
         return response.data;
       }

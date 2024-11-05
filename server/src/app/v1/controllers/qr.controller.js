@@ -46,7 +46,8 @@ export const uploadData = async (req, res) => {
 export const sendCertificate = [
   upload.single("pdf"),
   (req,res) => {
-
+    const email = req.body.email;
+    console.log(email);
     const pdfBuffer = req.file.buffer; // Access the uploaded PDF file in memory
     const fileName = req.file.originalname; // Get the original filename
 
@@ -103,8 +104,6 @@ export const sendCertificate = [
 </body>
 </html>
 `
-
-    const email = req.body.email;
         const mailDetails = {
         from: config.APP_MAIL_USER,
         to: email,
@@ -126,15 +125,15 @@ export const sendCertificate = [
         }
     })
 
-    mailTransporter.sendMail(mailDetails, function(err, data) {
-        if(err) {
-            console.log('Error Occurs',err);
-            return res.status(StatusCodes.CONFLICT).send("could not send mail")
-        } else {
-            console.log('Email sent successfully');
-            return res.status(StatusCodes.OK).send("Send mail successfully")
-        }
-    });
+    // mailTransporter.sendMail(mailDetails, function(err, data) {
+    //     if(err) {
+    //         console.log('Error Occurs',err);
+    //         return res.status(StatusCodes.CONFLICT).send("could not send mail")
+    //     } else {
+    //         console.log('Email sent successfully');
+    //         return res.status(StatusCodes.OK).send("Send mail successfully")
+    //     }
+    // });
 
 }
 ]

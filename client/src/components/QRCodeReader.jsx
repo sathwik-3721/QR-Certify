@@ -7,52 +7,94 @@ import QrScanner from 'qr-scanner'
 import { Document, Page, Text, View,Image, StyleSheet, PDFDownloadLink } from '@react-pdf/renderer'
 import API from '@/services/API'
 
-// Define styles for PDF
 const styles = StyleSheet.create({
   page: {
-    flexDirection: 'column',
-    backgroundColor: '#E4E4E4',
-    padding: 30,
+    backgroundColor: '#fff',
+    padding: 50,
+  },
+  header: {
+    textAlign: 'center',
+    fontSize: 30,
+    marginBottom: 20,
+    fontWeight: 'bold',
+  },
+  certificateText: {
+    textAlign: 'center',
+    fontSize: 20,
+    marginBottom: 40,
+    fontStyle: 'italic',
   },
   section: {
-    margin: 10,
-    padding: 10,
-    flexGrow: 1,
+    textAlign: 'center',
+    marginBottom: 20,
   },
-  title: {
-    fontSize: 24,
+  details: {
+    fontSize: 16,
     marginBottom: 10,
   },
+  name: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    marginBottom: 20,
+  },
   content: {
-    fontSize: 12,
+    fontSize: 16,
     marginBottom: 5,
   },
+  imageContainer: {
+    textAlign: 'center',
+    marginBottom: 20,
+  },
   image: {
-    width: 200, 
-    height: 200
-  }
+    width: 150,
+    height: 150,
+    margin: '0 auto',
+  },
+  footer: {
+    textAlign: 'center',
+    fontSize: 12,
+    marginTop: 30,
+    borderTop: '1px solid #000',
+    paddingTop: 10,
+  },
 });
 
-// PDF Document component
 const MyDocument = ({ data }) => (
   <Document>
     <Page size="A4" style={styles.page}>
-      <View style={styles.section}>
-        <Text style={styles.title}>Scanned QR Code Data</Text>
-        <Text style={styles.content}>Name: {data.name}</Text>
-        <Text style={styles.content}>Email: {data.email}</Text>
-        <Text style={styles.content}>Demo: {data.event}</Text>
+      <View>
+        <Text style={styles.header}>Certificate of Participation</Text>
+        <Text style={styles.certificateText}>
+          This is to certify that
+        </Text>
+        <Text style={styles.name}>{data.name}</Text>
+        <Text style={styles.certificateText}>
+          has successfully participated in the event "{data.event}"
+        </Text>
+
+        <View style={styles.imageContainer}>
+          {data.image ? (
+            <Image style={styles.image} src={data.image} />
+          ) : (
+            <Text>No image available</Text>
+          )}
+        </View>
+
         <View style={styles.section}>
-        {data.image ? (
-          <Image style={styles.image} src={data.image} />
-        ) : (
-          <Text>No image available</Text>
-        )}
-      </View>
+          <Text style={styles.details}>Email: {data.email}</Text>
+          <Text style={styles.details}>Event: {data.event}</Text>
+          <Text style={styles.details}>Date: {new Date().toLocaleDateString()}</Text>
+        </View>
+        
+        <View style={styles.footer}>
+          <Text>Thank you for your participation!</Text>
+          <Text>Organization Name</Text>
+        </View>
       </View>
     </Page>
   </Document>
 );
+
 
 export default function QRCodeReader() {
   const [scannedData, setScannedData] = useState(null)
@@ -77,28 +119,34 @@ export default function QRCodeReader() {
   }, [])
 
   const handlePdfGeneration = async (userData) => {
+    // window.alert("hello")
     const result = await API.get.getDetails(userData);
     console.log(result)
+   
+    // sendPDFToBackend()
     setDetails(result);
   }
 
   const sendPDFToBackend = async (pdfBlob) => {
-    console.log(pdfBlob)
-    // const formData = new FormData();
-    // formData.append('pdf', pdfBlob, 'certificate.pdf');
+    if (pdfBlob instanceof Blob){
+    console.log('Valid Blob:', pdfBlob);
+    const formData = new FormData();
+    formData.append("email",scannedData.email);
+    formData.append('pdf', pdfBlob, 'certificate.pdf');
   
     // // const response = await fetch('/api/send-pdf', {
     // //   method: 'POST',
     // //   body: formData,
     // // });
 
-    // const response = await API.post.sendCertificate(formData);
+    const response = await API.post.sendCertificate(formData);
   
-    // if (response.ok) {
-    //   console.log('PDF sent to backend successfully!');
-    // } else {
-    //   console.error('Error sending PDF to backend');
-    // }
+    if (response.ok) {
+      console.log('PDF sent to backend successfully!');
+    } else {
+      console.error('Error sending PDF to backend');
+    }
+  }
   };
 
   const startScanning = async () => {
@@ -203,23 +251,22 @@ export default function QRCodeReader() {
           )} */}
 
 
-          {scannedData && (
+          {details.image !== '' && (
             <PDFDownloadLink
               document={<MyDocument data={details} />}
               fileName="certificate.pdf"
             >
               {({ blob, url, loading, error }) => {
-                if (!loading) {
-                  <Button>Download</Button>
-                  // sendPDFToBackend(blob);
+                if (!loading && blob) {
+                  sendPDFToBackend(blob);
+                  return <Button>Download</Button>
                 }
-                // return <></>
               }}
             </PDFDownloadLink>
           )}
-
+          {details.image !== '' && <img src={details.image} />}
         </CardContent>
-        {/* <Button onClick={handlePdfGeneration}>Generate Pdf</Button> */}
+        <Button onClick={handlePdfGeneration}>Generate Pdf</Button>
       </Card>
     </div>
   )
