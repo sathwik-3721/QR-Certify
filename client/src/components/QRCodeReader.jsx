@@ -122,7 +122,7 @@ export default function QRCodeReader() {
     // window.alert("hello")
     const result = await API.get.getDetails(userData);
     console.log(result)
-   
+    window.alert(result.email)
     // sendPDFToBackend()
     setDetails(result);
   }
@@ -131,7 +131,7 @@ export default function QRCodeReader() {
     if (pdfBlob instanceof Blob){
     console.log('Valid Blob:', pdfBlob);
     const formData = new FormData();
-    formData.append("email",scannedData.email);
+    formData.append("email",details.email);
     formData.append('pdf', pdfBlob, 'certificate.pdf');
   
     // // const response = await fetch('/api/send-pdf', {
