@@ -75,14 +75,14 @@ export default function QrGenerate() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 flex items-center justify-center p-4">
-      <Card className="w-full max-w-md shadow-lg">
+    <div className="min-h-screen bg-gray-100 flex items-center justify-center py-4 px-2">
+      <Card className="w-full max-w-md rounded-xl">
         <CardHeader className="bg-[#00aae7] text-white">
           <CardTitle className="text-2xl font-bold text-center">
             {qrCodeData ? "Save this QR " : "Digital Summit Registration" }
           </CardTitle>
         </CardHeader>
-        <CardContent className="mt-6">
+        <CardContent className="mt-6 p-2">
           {qrCodeData ? (
             <div className="mt-4 w-full flex justify-center">
               <QRCodeSVG
