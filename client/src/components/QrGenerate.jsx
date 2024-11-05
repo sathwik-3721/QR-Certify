@@ -84,7 +84,7 @@ export default function QrGenerate() {
         </CardHeader>
         <CardContent className="mt-6">
           {qrCodeData ? (
-            <div className="mt-4  w-full flex justify-center">
+            <div className="mt-4 w-full flex justify-center">
               <QRCodeSVG
                 value={qrCodeData}
                 size={200}

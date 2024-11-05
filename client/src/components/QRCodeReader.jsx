@@ -125,11 +125,7 @@ export default function QRCodeReader() {
     try{
     setFetchingState('fetching details...');
     const result = await API.get.getDetails(userData);
-    console.log(result)
-    window.alert(result.email)
-    // sendPDFToBackend()
     setDetails(result);
-    setFetchingState('')
     }
     catch(err){
       console.log(err);
@@ -157,9 +153,6 @@ export default function QRCodeReader() {
     catch(err){
       console.log(err);
       setFetchingState("Failed to send mail");
-    }
-    finally{
-      setIsLoading('');
     }
   };
 
@@ -273,12 +266,10 @@ export default function QRCodeReader() {
               {({ blob, url, loading, error }) => {
                 if (!loading && blob) {
                   sendPDFToBackend(blob);
-                  return <Button>download</Button>
                 }
               }}
             </PDFDownloadLink>
           )}
-          {details.image !== '' && <img src={details.image} />}
 
         {
           fetchingState.includes("fetching") ? <div className='text-blue-600 bg-blue-300 flex p-2 items-center justify-center rounded-md'><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Fetching details...</div> : null 
