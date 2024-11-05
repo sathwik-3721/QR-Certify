@@ -210,8 +210,8 @@ export default function QRCodeReader() {
             >
               {({ blob, url, loading, error }) => {
                 if (!loading) {
-                  
-                  sendPDFToBackend(blob);
+                  <Button>Download</Button>
+                  // sendPDFToBackend(blob);
                 }
                 // return <></>
               }}
