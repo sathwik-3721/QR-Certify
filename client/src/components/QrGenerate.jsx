@@ -10,15 +10,13 @@ import API from '@/services/API';
 export default function QrGenerate() {
   const [formData, setFormData] = useState({
     name: '',
-    demo: '',
+    event: '',
     email: '',
-    image: null,
+    image: '',
   });
   const [qrCodeData, setQRCodeData] = useState('');
   const fileInputRef = useRef(null);
   const [error,setError] = useState(null);
-  const [image,setImage] = useState(null)
-  const [imgUrl,setImgUrl] = useState("")
   const [uploadedImage,setUploadedImage] = useState(null);
 
   const handleInputChange = (e) => {
@@ -27,48 +25,33 @@ export default function QrGenerate() {
   };
 
   const handleSelectChange = (value) => {
-    setFormData(prev => ({ ...prev, demo: value }));
+    setFormData(prev => ({ ...prev, event: value }));
   };
 
   const handleFileChange = (e) => {
     const file = e.target.files?.[0];
     if (file) {
-      setFormData(prev => ({ ...prev, profilePicture: file })); // Store file in formData
       const reader = new FileReader();
       reader.onloadend = () => {
-        setUploadedImage(reader.result);
+        setFormData(prev => ({ ...prev, image: reader.result }));
       };
       reader.readAsDataURL(file);
     }
   };
 
-  const createFormData = () => {
-    const data = new FormData(); // Create a new FormData instance
-  
-    // Append each form field to the FormData object
-    data.append('name', formData.name); // Append 'name'
-    data.append('demo', formData.demo); // Append 'demo'
-    data.append('email', formData.email); // Append 'email'
-  
-    // Check if profilePicture is not null, then append it
-    if (formData.profilePicture) {
-      data.append('image', formData.profilePicture); // Append the file (profilePicture)
-    }
-  
-    return data; // Return the FormData object
-  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try{
-      const data = createFormData();
-      console.log(data)
-      const result = await API.post.register(data);
+      // const data = createFormData();
+      console.log(formData)
+      const result = await API.post.register(formData);
       console.log(result)
+      setUploadedImage(result.newQr.image);
       // setImgUrl(result.newQr.image.data)
-      let { profilePicture, ...rest } = formData;
+      let { image, ...rest } = formData;
       const dataString = JSON.stringify(rest);
-      // setQRCodeData(dataString);
+      setQRCodeData(dataString);
     }
     catch(err){
       setError(err)
@@ -99,11 +82,11 @@ export default function QrGenerate() {
             <div className="space-y-2">
               <Label htmlFor="demo" className="text-gray-700">Demo</Label>
               <Select 
-                value={formData.demo} 
+                value={formData.event} 
                 onValueChange={handleSelectChange}
               >
-                <SelectTrigger id="demo" className="border-gray-300 focus:border-[#00aae7] focus:ring-[#00aae7]">
-                  <SelectValue placeholder="Select a demo" />
+                <SelectTrigger id="event" className="border-gray-300 focus:border-[#00aae7] focus:ring-[#00aae7]">
+                  <SelectValue placeholder="Select a event" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="Tech Talks">Tech Talks</SelectItem>
@@ -143,10 +126,10 @@ export default function QrGenerate() {
               >
                 Upload Profile Picture
               </Button>
-              {formData.profilePicture && (
+              {formData.image !== '' && (
                 <div className="mt-2 flex justify-center">
                   <img 
-                    src={uploadedImage} 
+                    src={formData.image} 
                     alt="Profile" 
                     className="w-32 h-32 object-cover rounded-full border-4 border-[#00aae7]"
                   />
@@ -174,7 +157,6 @@ export default function QrGenerate() {
           {
             error && <p className='text-red-500'>Error sending data</p>
           }
-          {image &&  <img src={imgUrl} /> }
         </CardFooter>
       </Card>
     </div>

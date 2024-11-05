@@ -41,10 +41,10 @@ const MyDocument = ({ data }) => (
         <Text style={styles.title}>Scanned QR Code Data</Text>
         <Text style={styles.content}>Name: {data.name}</Text>
         <Text style={styles.content}>Email: {data.email}</Text>
-        <Text style={styles.content}>Demo: {data.imageUrl}</Text>
+        <Text style={styles.content}>Demo: {data.event}</Text>
         <View style={styles.section}>
-        {data.imageUrl ? (
-          <Image style={styles.image} src={data.imageUrl} />
+        {data.image ? (
+          <Image style={styles.image} src={data.image} />
         ) : (
           <Text>No image available</Text>
         )}
@@ -61,10 +61,11 @@ export default function QRCodeReader() {
   const videoRef = useRef(null)
   const scannerRef = useRef(null)
   const [details,setDetails] = useState({
+    "_id":"",
     name: '',
     email: '',
-    demo: '',
-    imageUrl: ''
+    event: '',
+    image: ''
   });
 
   useEffect(() => {
@@ -75,27 +76,30 @@ export default function QRCodeReader() {
     }
   }, [])
 
-  // Function to convert ArrayBuffer to Base64
-const arrayBufferToBase64 = (buffer) => {
-  let binary = '';
-  const bytes = new Uint8Array(buffer);
-  const len = bytes.byteLength;
-  for (let i = 0; i < len; i++) {
-    binary += String.fromCharCode(bytes[i]);
-  }
-  return window.btoa(binary);
-};
-
-  const handlePdfGeneration = async () => {
-    const result = await API.get.getDetails();
+  const handlePdfGeneration = async (userData) => {
+    const result = await API.get.getDetails(userData);
     console.log(result)
-    // const blob = new Blob([result.image.data], { type: 'image/jpeg' });
-
-    // // Create a Blob URL and set it as the src for the image
-    // const imageUrl = URL.createObjectURL(blob);
-    // console.log(imageUrl)
-    // setDetails({...result,imageUrl : imageUrl});
+    setDetails(result);
   }
+
+  const sendPDFToBackend = async (pdfBlob) => {
+    console.log(pdfBlob)
+    // const formData = new FormData();
+    // formData.append('pdf', pdfBlob, 'certificate.pdf');
+  
+    // // const response = await fetch('/api/send-pdf', {
+    // //   method: 'POST',
+    // //   body: formData,
+    // // });
+
+    // const response = await API.post.sendCertificate(formData);
+  
+    // if (response.ok) {
+    //   console.log('PDF sent to backend successfully!');
+    // } else {
+    //   console.error('Error sending PDF to backend');
+    // }
+  };
 
   const startScanning = async () => {
     setError(null)
@@ -109,7 +113,8 @@ const arrayBufferToBase64 = (buffer) => {
         videoRef.current,
         (result) => {
           try {
-            const parsedData = JSON.parse(result.data)
+            const parsedData = JSON.parse(result.data);
+            handlePdfGeneration(parsedData)
             setScannedData(parsedData)
           } catch (err) {
             setError('Invalid QR code data format')
@@ -162,26 +167,16 @@ const arrayBufferToBase64 = (buffer) => {
             </Alert>
           )}
 
-          {details && (
-            <Alert>
-              <AlertTitle>Scanned Data</AlertTitle>
-              <AlertDescription>
-                <p>Name: {details.name}</p>
-                <p>Email: {details.email}</p>
-                <p>Demo: {details.demo}</p>
-              </AlertDescription>
-            </Alert>
-          )}
-          {/* {scannedData && (
+          {scannedData && (
             <Alert>
               <AlertTitle>Scanned Data</AlertTitle>
               <AlertDescription>
                 <p>Name: {scannedData.name}</p>
                 <p>Email: {scannedData.email}</p>
-                <p>Demo: {scannedData.demo}</p>
+                <p>Demo: {scannedData.event}</p>
               </AlertDescription>
             </Alert>
-          )} */}
+          )}
 
           <Button 
             onClick={isScanning ? stopScanning : startScanning} 
@@ -208,25 +203,23 @@ const arrayBufferToBase64 = (buffer) => {
           )} */}
 
 
-          {details.demo !== '' && (
+          {scannedData && (
             <PDFDownloadLink
               document={<MyDocument data={details} />}
-              fileName="scanned_qr_data.pdf"
+              fileName="certificate.pdf"
             >
-              {({ blob, url, loading, error }) => (
-                <Button 
-                  className="w-full bg-[#2368a0] hover:bg-[#1c5280] text-white"
-                  disabled={loading}
-                >
-                  {loading ? 'Generating PDF...' : 'Download PDF'}
-                  <FileDown className="ml-2 h-4 w-4" />
-                </Button>
-              )}
+              {({ blob, url, loading, error }) => {
+                if (!loading) {
+                  
+                  sendPDFToBackend(blob);
+                }
+                // return <></>
+              }}
             </PDFDownloadLink>
           )}
 
         </CardContent>
-        <Button onClick={handlePdfGeneration}>Generate Pdf</Button>
+        {/* <Button onClick={handlePdfGeneration}>Generate Pdf</Button> */}
       </Card>
     </div>
   )
