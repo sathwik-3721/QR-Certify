@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import Layout from "./layout/Layout";
+import 'react-toastify/dist/ReactToastify.css';
 
 
 function App() {

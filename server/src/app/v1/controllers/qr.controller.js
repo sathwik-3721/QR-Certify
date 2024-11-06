@@ -85,15 +85,6 @@ export const sendCertificate = [
       </td>
     </tr>
 
-    <!-- Button -->
-    <tr>
-      <td style="padding: 20px; text-align: center;">
-        <a href="[Certificate Download Link]" style="background-color: #2368a0; color: #ffffff; text-decoration: none; padding: 10px 20px; border-radius: 5px; font-size: 16px;">
-          Download Your Certificate
-        </a>
-      </td>
-    </tr>
-
     <!-- Footer -->
     <tr>
       <td style="background-color: #f4f4f4; padding: 20px; text-align: center; font-size: 14px; color: #777777;">
@@ -124,17 +115,18 @@ export const sendCertificate = [
             pass: config.APP_MAIL_PASSWORD
         }
     })
+    console.log("mail sent",email)
 
-    // mailTransporter.sendMail(mailDetails, function(err, data) {
-    //     if(err) {
-    //         console.log('Error Occurs',err);
-    //         return res.status(StatusCodes.CONFLICT).send("could not send mail")
-    //     } else {
-    //         console.log('Email sent successfully');
-    //         return res.status(StatusCodes.OK).send("Send mail successfully")
-    //     }
-    // });
-
+    mailTransporter.sendMail(mailDetails, function(err, data) {
+        if(err) {
+            console.log('Error Occurs',err);
+            return res.status(StatusCodes.CONFLICT).send("could not send mail")
+        } else {
+            console.log('Email sent successfully');
+            return res.status(StatusCodes.OK).send("Send mail successfully")
+        }
+    });
+    
 }
 ]
 
@@ -143,7 +135,8 @@ export async function getDetails(req, res) {
         const { name, email,event } = req.query;
         const result = await Qr.findOne({ name, email, event });
         console.log(result)
-        return res.send(result)
+        return res.status(200).send(result)
+        
     } catch(error) {
         console.error("An error occurred in uploadData function:", error);
         if (error.status) {
