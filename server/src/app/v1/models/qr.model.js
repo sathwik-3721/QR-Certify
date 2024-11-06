@@ -26,6 +26,7 @@ const qrSchema = new mongoose.Schema({
   },
 });
 
+qrSchema.index({ name: 1, email: 1, event : 1 }, { unique: true });
 
 // Create a model from the schema
 const Qr = mongoose.model('Qr', qrSchema);

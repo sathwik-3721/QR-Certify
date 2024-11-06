@@ -1,28 +1,23 @@
 import { Button } from "@/components/ui/button";
-import { useState } from "react";
+import { useState,useEffect } from "react";
 import Layout from "./layout/Layout";
 import 'react-toastify/dist/ReactToastify.css';
+import QrGenerate from "./components/QrGenerate";
 
 
 function App() {
-  const [authenticated, setAuthenticated] = useState(true);
+  const [authenticated, setAuthenticated] = useState(false);
+
+  useEffect(() => {
+    const user = localStorage.getItem("userData");
+    if(user) setAuthenticated(true);
+  },[authenticated])
+
   return (
     <>
-      {authenticated ? (
-        <div className=" h-full w-full">
-          <Layout />
+        <div className="h-full w-full">
+          <Layout authenticated={authenticated} setAuthenticated={setAuthenticated} />
         </div>
-      ) : (
-        <div className="flex h-full w-full items-center justify-center">
-          <Button
-            onClick={() => {
-              setAuthenticated(true);
-            }}
-          >
-            Login
-          </Button>
-        </div>
-      )}
     </>
   );
 }

@@ -4,6 +4,8 @@ import Qr from "../models/qr.model.js";
 import { StatusCodes } from 'http-status-codes';
 import nodemailer from 'nodemailer'
 import multer from "multer";
+import axios from "axios";
+import xlsx from "xlsx";
 
 const storage = multer.memoryStorage();
 
@@ -16,19 +18,15 @@ const upload = multer({
 export const uploadData = async (req, res) => {
         try {
             const { name, email,event,image } = req.body; // Get name and email from body
-
-            // Debugging output
-            console.log(Object.keys(req))
-            console.log("Received Name:", name);
-            console.log("Received Email:", email);
-            console.log("Received event:", event);
-            // console.log("Received Image Buffer:", image);
-
+            const result = await Qr.findOne({ name, email, event });
+            if(result){
+              throw {status : StatusCodes.CONFLICT , message : "User already exists"}
+            }
             const newQr = new Qr({
-                name,
-                email,
-                event,
-                image,
+              name,
+              email,
+              event,
+              image,
             });
 
             await newQr.save(); // Save the document to MongoDB
@@ -46,7 +44,7 @@ export const uploadData = async (req, res) => {
 export const sendCertificate = [
   upload.single("pdf"),
   (req,res) => {
-    const email = req.body.email;
+    const {name,email,event} = req.body;
     console.log(email);
     const pdfBuffer = req.file.buffer; // Access the uploaded PDF file in memory
     const fileName = req.file.originalname; // Get the original filename
@@ -71,10 +69,10 @@ export const sendCertificate = [
     <tr>
       <td style="padding: 20px;">
         <p style="color: #333333; font-size: 16px; line-height: 1.6; margin-bottom: 20px;">
-          Dear [Participant Name],
+          Dear ${name},
         </p>
         <p style="color: #333333; font-size: 16px; line-height: 1.6; margin-bottom: 20px;">
-          We would like to extend our sincere thanks for your participation in [Event Name]. Your engagement and enthusiasm contributed significantly to the success of the event.
+          We would like to extend our sincere thanks for your participation in ${event}. Your engagement and enthusiasm contributed significantly to the success of the event.
         </p>
         <p style="color: #333333; font-size: 16px; line-height: 1.6; margin-bottom: 20px;">
           As a token of our appreciation, we are pleased to attach your participation certificate. Please find it attached to this email.
@@ -88,7 +86,7 @@ export const sendCertificate = [
     <!-- Footer -->
     <tr>
       <td style="background-color: #f4f4f4; padding: 20px; text-align: center; font-size: 14px; color: #777777;">
-        <p style="margin: 0;">© [Year] [Your Organization]. All Rights Reserved.</p>
+        <p style="margin: 0;">© 2024 Miracle Software Systems, Inc. All Rights Reserved.</p>
       </td>
     </tr>
   </table>
@@ -135,8 +133,10 @@ export async function getDetails(req, res) {
         const { name, email,event } = req.query;
         const result = await Qr.findOne({ name, email, event });
         console.log(result)
-        return res.status(200).send(result)
-        
+        if(result){
+          return res.status(200).send(result)
+        }
+        throw {status : 404 , message : "User details not found"}
     } catch(error) {
         console.error("An error occurred in uploadData function:", error);
         if (error.status) {

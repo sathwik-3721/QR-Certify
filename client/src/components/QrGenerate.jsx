@@ -56,17 +56,19 @@ export default function QrGenerate() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      // const data = createFormData();
       setIsLoading(true);
       const result = await API.post.register(formData);
       console.log(result);
-      // setImgUrl(result.newQr.image.data)
       let { image, ...rest } = formData;
       const dataString = JSON.stringify(rest);
       setQRCodeData(dataString);
     } catch (err) {
-      toast.error("Failed to send mail");
-      console.log(err);
+      if(err.response && err.response.status === 409){
+        toast.error("User already registered");
+      }
+      else{
+          toast.error("Failed to generate QR");
+      }
     }
     finally{
       setIsLoading(false);
@@ -76,13 +78,13 @@ export default function QrGenerate() {
   return (
     <div className="min-h-screen bg-gray-100 flex md:items-center md:justify-center">
       <ToastContainer />
-      <Card className="w-full max-w-md rounded-xl h-fit mt-10">
-        <CardHeader className="bg-[#00aae7] text-white">
+      <Card className={`w-full max-w-md rounded-xl h-fit mt-3 mx-2`}>
+        <CardHeader className="bg-[#00aae7] text-white rounded-t-xl">
           <CardTitle className="text-2xl font-bold text-center">
             {qrCodeData ? "Save this QR " : "Digital Summit Registration" }
           </CardTitle>
         </CardHeader>
-        <CardContent className="mt-6 md:p-4 p-2">
+        <CardContent className="md:p-4 p-2 py-4">
           {qrCodeData ? (
             <div className="mt-4 w-full flex justify-center">
               <QRCodeSVG
