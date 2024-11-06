@@ -120,7 +120,6 @@ export default function QRCodeReader() {
     event: "",
     image: "",
   });
-  const [pdfBlob, setPdfBlob] = useState(null);
 
   useEffect(() => {
     return () => {

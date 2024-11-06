@@ -51,10 +51,8 @@ app.use(requestLoggerMiddleware);
 app.use(express.json({ limit: '10mb' }))
 app.use(urlencoded({ extended: false }));
 app.use(cookieParser());
-app.use(static_(join(__dirname, 'public')));
-
-//V1
 app.use('/v1', appv1);
+app.use(static_(join(__dirname, 'public')));
 
 logger.info("Application Environment : " + environmant);
 app.listen(port, () => {

@@ -19,6 +19,8 @@ import {
 } from "@/components/ui/select";
 import { QRCodeSVG } from "qrcode.react";
 import API from "@/services/API";
+import { ToastContainer, toast } from "react-toastify";
+
 
 export default function QrGenerate() {
   const [formData, setFormData] = useState({
@@ -29,8 +31,6 @@ export default function QrGenerate() {
   });
   const [qrCodeData, setQRCodeData] = useState("");
   const fileInputRef = useRef(null);
-  const [error, setError] = useState(null);
-  const [uploadedImage, setUploadedImage] = useState(null);
   const [isLoading,setIsLoading] = useState(false)
 
   const handleInputChange = (e) => {
@@ -58,16 +58,14 @@ export default function QrGenerate() {
     try {
       // const data = createFormData();
       setIsLoading(true);
-      setError(null)
       const result = await API.post.register(formData);
       console.log(result);
-      setUploadedImage(result.newQr.image);
       // setImgUrl(result.newQr.image.data)
       let { image, ...rest } = formData;
       const dataString = JSON.stringify(rest);
       setQRCodeData(dataString);
     } catch (err) {
-      setError(err);
+      toast.error("Failed to send mail");
       console.log(err);
     }
     finally{
@@ -77,6 +75,7 @@ export default function QrGenerate() {
 
   return (
     <div className="min-h-screen bg-gray-100 flex md:items-center md:justify-center">
+      <ToastContainer />
       <Card className="w-full max-w-md rounded-xl h-fit mt-10">
         <CardHeader className="bg-[#00aae7] text-white">
           <CardTitle className="text-2xl font-bold text-center">
@@ -193,9 +192,7 @@ export default function QrGenerate() {
             </form>
           )}
         </CardContent>
-        <CardFooter className="flex justify-center">
-          {error && <p className="text-red-500">Error sending data</p>}
-        </CardFooter>
+
       </Card>
     </div>
   );
