@@ -58,6 +58,7 @@ export default function QrGenerate() {
     try {
       // const data = createFormData();
       setIsLoading(true);
+      setError(null)
       const result = await API.post.register(formData);
       console.log(result);
       setUploadedImage(result.newQr.image);
