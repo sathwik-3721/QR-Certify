@@ -283,7 +283,7 @@ export default function QRCodeReader({ setAuthenticated }) {
                 <div className="text-sm">
                   <h2 className="font-semibold">User Details</h2>
                   <p>Name: {details.name}</p>
-                  <p>Email: {details.email}</p>
+                  <p>Email: {details.email.substring(0,10) + "***" + details.email.substring(14)}</p>
                   <p>Demo: {details.event }</p>
                   {details.issued && <p><span className="text-green-700 font-semibold">Certificate Issued</span>  </p>}
                 </div>
