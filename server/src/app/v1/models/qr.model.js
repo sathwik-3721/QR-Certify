@@ -16,7 +16,7 @@ const qrSchema = new mongoose.Schema({
     trim: true,
   },
   image: {
-    type: String, // Use Buffer to store binary data like a Blob
+    type: String, // to store base64 image
     required: false,
   },
   event: {
@@ -24,6 +24,10 @@ const qrSchema = new mongoose.Schema({
     required: true,
     trim: true,
   },
+  issued : {
+    type : Boolean,
+    default : false,
+  }
 });
 
 qrSchema.index({ name: 1, email: 1, event : 1 }, { unique: true });

@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Camera, AlertCircle, LogOut, Mail, X } from "lucide-react";
+import { Camera, AlertCircle, LogOut, Mail, XCircle } from "lucide-react";
 import pic from "../assets/react.svg";
 import QrScanner from "qr-scanner";
 import {
@@ -112,13 +112,15 @@ export default function QRCodeReader({ setAuthenticated }) {
   const videoRef = useRef(null);
   const scannerRef = useRef(null);
   const [fetchingState, setFetchingState] = useState("idle");
-  const [details, setDetails] = useState({
+  const initialState = {
     _id: "",
     name: "",
     email: "",
     event: "",
     image: "",
-  });
+    issued : ""
+  }
+  const [details, setDetails] = useState(initialState);
 
   useEffect(() => {
     return () => {
@@ -132,6 +134,11 @@ export default function QRCodeReader({ setAuthenticated }) {
     localStorage.removeItem("userData");
     setAuthenticated(false);
   };
+
+  const handleCancelMail = () => {
+    setFetchingState("idle");
+    setDetails(initialState)
+  }
 
   const generateAndSendPDF = async () => {
     try {
@@ -151,13 +158,16 @@ export default function QRCodeReader({ setAuthenticated }) {
       setFetchingState("fetching details...");
       const result = await API.get.getDetails(userData);
       // await generateAndSendPDF(result);
+      if(result.issued){
+        setFetchingState("idle");
+      }
+      else{
+        setFetchingState("fetched");
+      }
       setDetails(result);
     } catch (err) {
       console.log(err);
       toast.error("Error while fechin details");
-    }
-    finally{
-      setFetchingState("fetched");
     }
   };
 
@@ -172,13 +182,14 @@ export default function QRCodeReader({ setAuthenticated }) {
         formData.append("email", data.email);
         formData.append("pdf", pdfBlob, "certificate.pdf");
         const response = await API.post.sendCertificate(formData);
+        setDetails(initialState)
         toast.success("Mail sent successfully");
       }
     } catch (err) {
       console.log(err);
       toast.error("Failed to send mail");
     } finally {
-      setFetchingState("");
+      setFetchingState("idle");
     }
   };
 
@@ -186,14 +197,7 @@ export default function QRCodeReader({ setAuthenticated }) {
     setError(null);
     setScannedData(null);
     setIsScanning(true);
-    setFetchingState("");
-    setDetails({
-      _id: "",
-      name: "",
-      email: "",
-      event: "",
-      image: "",
-    });
+    setDetails(initialState);
 
     try {
       if (!videoRef.current) return;
@@ -213,8 +217,8 @@ export default function QRCodeReader({ setAuthenticated }) {
         },
         {
           returnDetailedScanResult: true,
-          highlightScanRegion: true,
-          highlightCodeOutline: true,
+          highlightScanRegion: false,
+          highlightCodeOutline: false,
         }
       );
 
@@ -233,6 +237,10 @@ export default function QRCodeReader({ setAuthenticated }) {
     }
     setIsScanning(false);
   };
+
+  useEffect(() =>{
+    console.log(fetchingState)
+  },[fetchingState])
 
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col">
@@ -273,11 +281,12 @@ export default function QRCodeReader({ setAuthenticated }) {
               <div className="flex justify-between">
                 <div className="text-sm">
                   <h2 className="font-semibold">User Details</h2>
-                  <p>Name: Revanth</p>
-                  <p>Email: revanth@gmail.com</p>
-                  <p>Demo: demo</p>
+                  <p>Name: {details.name}</p>
+                  <p>Email: {details.email}</p>
+                  <p>Demo: {details.event }</p>
+                  {details.issued && <p><span className="text-green-700 font-semibold">Certificate Issued</span>  </p>}
                 </div>
-                <div className="flex justify-center">
+                <div className="flex justify-center items-center">
                   <img
                     src={details.image}
                     alt="Profile"
@@ -287,11 +296,11 @@ export default function QRCodeReader({ setAuthenticated }) {
               </div>
             )}
 
-            {fetchingState.includes() ? (
+            {fetchingState.includes("idle") || fetchingState.includes("fetching") || fetchingState.includes("sending") ? (
               <Button
                 onClick={isScanning ? stopScanning : startScanning}
                 className="w-full bg-[#00aae7] hover:bg-[#0088b9] text-white"
-                disabled={fetchingState !== ""}
+                disabled={fetchingState !== "idle"}
               >
                 {isScanning
                   ? "Stop Scanning"
@@ -302,16 +311,34 @@ export default function QRCodeReader({ setAuthenticated }) {
                   : "Start Scanning"}
               </Button>
             ) : (
-              <div className="flex justify-between">
-                <Button className="bg-green-600">
-                  <Mail onClick={generateAndSendPDF}/>
-                  Send Mail
-                </Button>
-                <Button variant="destructive" className="">
-                  <X />
-                  Cancel
-                </Button>
-              </div>
+              // <div className="flex justify-between">
+              //   <Button onClick={generateAndSendPDF} className="bg-miracle-mediumBlue">
+              //     <Mail />
+              //     Send Mail
+              //   </Button>
+              //   <Button variant="destructive" onClick={handleCancelMail} className="bg-miracle-red">
+              //     <X />
+              //     Cancel
+              //   </Button>
+              // </div>
+              <div className="flex space-x-2">
+              <Button 
+                onClick={generateAndSendPDF} 
+                className="flex-1 bg-[#2368a0] hover:bg-[#1c5280] text-white"
+                
+              >
+                 Send Mail
+                <Mail className="h-4 w-4" />
+              </Button>
+              <Button 
+                onClick={handleCancelMail} 
+                variant="outline" 
+                className="flex-1 bg-miracle-red text-white"
+              >
+                Cancel
+                <XCircle className=" h-4 w-4" />
+              </Button>
+            </div>
             )}
 
             {/* {scannedData && (

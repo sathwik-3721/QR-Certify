@@ -4,8 +4,6 @@ import Qr from "../models/qr.model.js";
 import { StatusCodes } from 'http-status-codes';
 import nodemailer from 'nodemailer'
 import multer from "multer";
-import axios from "axios";
-import xlsx from "xlsx";
 
 const storage = multer.memoryStorage();
 
@@ -41,10 +39,45 @@ export const uploadData = async (req, res) => {
         }
     }
 
+const updateCertificateStatus = async (name,email,event) => {
+  try{
+    const response = await Qr.updateOne({name,email,event}, {$set : {issued : true}});
+
+      // Check if the update was successful
+      if (response.matchedCount === 0) {
+        throw {
+          status: 404, // Not Found
+          message: 'No matching document found.',
+        };
+      }
+  
+      if (response.modifiedCount === 0) {
+        throw {
+          status: 204, // No Content (document found but no changes made)
+          message: 'Document found but no update made.',
+        };
+      }
+  
+      return {
+        status: 200, // OK
+        message: 'Certificate status updated successfully.',
+      };
+    } catch (err) {
+      // Catch any errors that occurred during the update
+      throw {
+        status: 500, // Internal Server Error
+        message: 'An error occurred while updating the certificate status.',
+        error: err.message,
+      };
+    }
+
+}
+
 export const sendCertificate = [
   upload.single("pdf"),
-  (req,res) => {
-    const {name,email,event} = req.body;
+  async (req,res) => {
+    try{
+      const {name,email,event} = req.body;
     console.log(email);
     const pdfBuffer = req.file.buffer; // Access the uploaded PDF file in memory
     const fileName = req.file.originalname; // Get the original filename
@@ -93,7 +126,7 @@ export const sendCertificate = [
 </body>
 </html>
 `
-        const mailDetails = {
+    const mailDetails = {
         from: config.APP_MAIL_USER,
         to: email,
         subject: "Participation Certificate",
@@ -104,7 +137,7 @@ export const sendCertificate = [
               content:pdfBuffer
             }
           ]
-      };
+    };
 
     const mailTransporter = nodemailer.createTransport({
         service: 'gmail',
@@ -115,15 +148,28 @@ export const sendCertificate = [
     })
     console.log("mail sent",email)
 
-    mailTransporter.sendMail(mailDetails, function(err, data) {
-        if(err) {
-            console.log('Error Occurs',err);
-            return res.status(StatusCodes.CONFLICT).send("could not send mail")
+    // mailTransporter.sendMail(mailDetails, function(err, data) {
+    //     if(err) {
+    //         console.log('Error Occurs',err);
+    //         return res.status(StatusCodes.CONFLICT).send("could not send mail")
+    //     } else {
+    //         console.log('Email sent successfully');
+    //         return res.status(StatusCodes.OK).send("Send mail successfully")
+    //     }
+    // });
+    await updateCertificateStatus(name,email,event);
+    setTimeout(() => {
+      return res.status(StatusCodes.OK).send("Send mail successfully")
+    },1000)
+    }
+    catch(error){
+      console.error("An error occurred in uploadData function:", error);
+        if (error.status) {
+            res.status(error.status).send(error.message);
         } else {
-            console.log('Email sent successfully');
-            return res.status(StatusCodes.OK).send("Send mail successfully")
+            res.status(StatusCodes.INTERNAL_SERVER_ERROR).send("An error occurred");
         }
-    });
+    }
     
 }
 ]
@@ -134,9 +180,11 @@ export async function getDetails(req, res) {
         const result = await Qr.findOne({ name, email, event });
         console.log(result)
         if(result){
+          setTimeout(() => {
           return res.status(200).send(result)
+          },1000)
         }
-        throw {status : 404 , message : "User details not found"}
+        // throw {status : 404 , message : "User details not found"}
     } catch(error) {
         console.error("An error occurred in uploadData function:", error);
         if (error.status) {

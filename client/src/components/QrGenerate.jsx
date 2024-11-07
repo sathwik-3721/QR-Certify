@@ -44,12 +44,16 @@ export default function QrGenerate() {
 
   const handleFileChange = (e) => {
     const file = e.target.files?.[0];
-    if (file) {
+    console.log(file)
+    if (file && file.type.includes("image")) {
       const reader = new FileReader();
       reader.onloadend = () => {
         setFormData((prev) => ({ ...prev, image: reader.result }));
       };
       reader.readAsDataURL(file);
+    }
+    else{
+      toast.error("Select Image only")
     }
   };
 
