@@ -20,7 +20,15 @@ import {
 import { QRCodeSVG } from "qrcode.react";
 import API from "@/services/API";
 import { ToastContainer, toast } from "react-toastify";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
 
+const registerSchema = z.object({
+  name: z.string().min(1, "Name is required"),   
+  event: z.string().refine((val) => val !== "",{message : "Please select an event"}), 
+  email: z.string().email("Invalid email address"), 
+  image: z.instanceof(File, "Profile picture is required"), 
+});
 
 export default function QrGenerate() {
   const [formData, setFormData] = useState({
@@ -32,6 +40,7 @@ export default function QrGenerate() {
   const [qrCodeData, setQRCodeData] = useState("");
   const fileInputRef = useRef(null);
   const [isLoading,setIsLoading] = useState(false)
+  const [errors,setErrors] = useState({})
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -44,7 +53,7 @@ export default function QrGenerate() {
 
   const handleFileChange = (e) => {
     const file = e.target.files?.[0];
-    console.log(file)
+    console.log(file.type)
     if (file && file.type.includes("image")) {
       const reader = new FileReader();
       reader.onloadend = () => {
@@ -59,15 +68,31 @@ export default function QrGenerate() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    const formDataToValidate = {
+      name: formData.name,
+      event: formData.event,
+      email: formData.email,
+      image: formData.image, 
+    };
     try {
       setIsLoading(true);
+      registerSchema.parse(formDataToValidate);
       const result = await API.post.register(formData);
       console.log(result);
       let { image, ...rest } = formData;
       const dataString = JSON.stringify(rest);
       setQRCodeData(dataString);
     } catch (err) {
-      if(err.response && err.response.status === 409){
+      if(err instanceof z.ZodError){
+        const formattedErrors = err.errors.reduce((acc, error) => {
+          acc[error.path[0]] = error.message;
+          return acc;
+        }, {});
+  
+        setErrors(formattedErrors);  
+        console.error("Validation failed:", formattedErrors);
+      }
+      else if(err.response && err.response.status === 409){
         toast.error("User already registered");
       }
       else{
@@ -111,9 +136,10 @@ export default function QrGenerate() {
                   name="name"
                   value={formData.name}
                   onChange={handleInputChange}
-                  required
+                  
                   className="border-gray-300 focus:border-[#00aae7] focus:ring-[#00aae7]"
                 />
+                {errors.name && <p className="text-miracle-red text-sm">{errors.name}</p>}
               </div>
               <div className="space-y-2">
                 <Label htmlFor="demo" className="text-gray-700">
@@ -136,6 +162,7 @@ export default function QrGenerate() {
                     <SelectItem value="Quiz">Quiz</SelectItem>
                   </SelectContent>
                 </Select>
+                {errors.event && <p className="text-miracle-red text-sm">{errors.event}</p>}
               </div>
               <div className="space-y-2">
                 <Label htmlFor="email" className="text-gray-700">
@@ -147,17 +174,17 @@ export default function QrGenerate() {
                   type="email"
                   value={formData.email}
                   onChange={handleInputChange}
-                  required
                   className="border-gray-300 focus:border-[#00aae7] focus:ring-[#00aae7]"
                 />
+                {errors.email && <p className="text-miracle-red text-sm">{errors.email}</p>}
               </div>
               <div className="space-y-2">
-                <Label htmlFor="profilePicture" className="text-gray-700">
+                <Label htmlFor="image" className="text-gray-700">
                   Profile Picture
                 </Label>
                 <Input
-                  id="profilePicture"
-                  name="profilePicture"
+                  id="image"
+                  name="image"
                   type="file"
                   accept="image/*"
                   onChange={handleFileChange}
@@ -171,6 +198,7 @@ export default function QrGenerate() {
                 >
                   Upload Profile Picture
                 </Button>
+                {errors.image && <p className="text-miracle-red text-sm">{errors.image}</p>}
                 {formData.image !== "" && (
                   <div className="mt-2 flex justify-center">
                     <img

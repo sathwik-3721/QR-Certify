@@ -131,8 +131,9 @@ export default function QRCodeReader({ setAuthenticated }) {
   }, []);
 
   const handleLogout = () => {
-    localStorage.removeItem("userData");
-    setAuthenticated(false);
+    // localStorage.removeItem("userData");
+    // setAuthenticated(false);
+    console.log("logged out")
   };
 
   const handleCancelMail = () => {
@@ -244,12 +245,12 @@ export default function QRCodeReader({ setAuthenticated }) {
 
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col">
-      <header className="bg-white shadow-md py-4 2xl:px-8 p-2 flex justify-end">
+      {/* <header className="bg-white shadow-md py-4 2xl:px-8 p-2 flex justify-end">
         <LogOut
           onClick={handleLogout}
           className="h-4 w-4 mr-2 cursor-pointer"
         />
-      </header>
+      </header> */}
       <ToastContainer />
       <div className="px-2 md:items-center md:justify-center flex justify-center">
         <Card className="w-full max-w-md mt-5 h-fit pb-2 md:pb-0 rounded-xl">
