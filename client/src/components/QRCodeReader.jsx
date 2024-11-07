@@ -278,13 +278,13 @@ export default function QRCodeReader({ setAuthenticated }) {
             )}
 
 
-            {details.email != "" && (
+            {details.email !== "" && (
               <div className="flex justify-between">
                 <div className="text-sm">
                   <h2 className="font-semibold">User Details</h2>
                   <p>Name: {details.name}</p>
-                  <p>Email: {details.email.substring(0,10) + "***" + details.email.substring(14)}</p>
-                  <p>Demo: {details.event }</p>
+                  <p>Email: {details.email.substring(0,details.email.lastIndexOf('@')).length > 13 ? details.email.substring(0,5) + "***" + details.email.substring(details.email.lastIndexOf('@') - 5) : details.email}</p>
+                  <p>Demo: {details.event}</p>
                   {details.issued && <p><span className="text-green-700 font-semibold">Certificate Issued</span>  </p>}
                 </div>
                 <div className="flex justify-center items-center">
