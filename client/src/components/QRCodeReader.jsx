@@ -131,8 +131,8 @@ export default function QRCodeReader({ setAuthenticated }) {
   }, []);
 
   const handleLogout = () => {
-    // localStorage.removeItem("userData");
-    // setAuthenticated(false);
+    localStorage.removeItem("userData");
+    setAuthenticated(false);
     console.log("logged out")
   };
 

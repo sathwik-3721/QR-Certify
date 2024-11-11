@@ -2,11 +2,11 @@ import { Button } from "@/components/ui/button";
 import { useState,useEffect } from "react";
 import Layout from "./layout/Layout";
 import 'react-toastify/dist/ReactToastify.css';
-import QrGenerate from "./components/QrGenerate";
+// import QrGenerate from "./components/QrGenerate";
 
 
 function App() {
-  const [authenticated, setAuthenticated] = useState(false);
+  const [authenticated, setAuthenticated] = useState(true);
 
   useEffect(() => {
     const user = localStorage.getItem("userData");
