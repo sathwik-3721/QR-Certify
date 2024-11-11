@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Camera, AlertCircle, LogOut, Mail, XCircle } from "lucide-react";
-import pic from "../assets/react.svg";
+import miracleLogo from '../assets/miracle.png'
 import QrScanner from "qr-scanner";
 import {
   Document,
@@ -244,7 +244,7 @@ export default function QRCodeReader({ setAuthenticated }) {
   },[fetchingState])
 
   return (
-    <div className="min-h-screen bg-gray-100 flex flex-col">
+    <div className="min-h-screen bg-gray-100 flex flex-col md:justify-center">
       {/* <header className="bg-white shadow-md py-4 2xl:px-8 p-2 flex justify-end">
         <LogOut
           onClick={handleLogout}
@@ -253,18 +253,22 @@ export default function QRCodeReader({ setAuthenticated }) {
       </header> */}
       <ToastContainer />
       <div className="px-2 md:items-center md:justify-center flex justify-center">
-        <Card className="w-full max-w-md mt-5 h-fit pb-2 md:pb-0 rounded-xl">
-          <CardHeader className="bg-[#00aae7] text-white rounded-t-xl">
-            <CardTitle className="text-2xl font-bold text-center">
-              QR Code Reader
+        <Card className="w-full max-w-md mt-5 h-fit pb-2 md:pb-2 rounded-xl p-2">
+          <CardHeader className="text-white rounded-t-xl p-2">
+            <div className="mb-2 flex justify-between"><img src={miracleLogo} width={100} alt="miracle" /> <div className="flex justify-center items-center bg-miracle-lightBlue text-white rounded-full w-8 h-8"><LogOut
+          onClick={handleLogout}
+          className="h-4 w-4 cursor-pointer"
+        /></div></div>
+            <CardTitle className="text-2xl font-bold text-center text-miracle-darkBlue">
+              Digital Summit Scanner
             </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-4 md:p-4 p-2">
-            <div className="relative aspect-video bg-black rounded-lg overflow-hidden h-[300px] w-full md:w-full md:h-[400px]">
+          <CardContent className="space-y-4 md:px-4 p-2">
+            <div className="relative aspect-video bg-miracle-mediumBlue/50 rounded-lg overflow-hidden h-[300px] w-full md:w-full md:h-[400px]">
               <video ref={videoRef} className="w-full h-full object-cover" />
               {!isScanning && (
                 <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50">
-                  <Camera className="w-16 h-16 text-white opacity-50" />
+                  <Camera className="w-16 h-16 text-miracle-white opacity-50" />
                 </div>
               )}
             </div>

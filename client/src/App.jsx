@@ -6,7 +6,7 @@ import QrGenerate from "./components/QrGenerate";
 
 
 function App() {
-  const [authenticated, setAuthenticated] = useState(true);
+  const [authenticated, setAuthenticated] = useState(false);
 
   useEffect(() => {
     const user = localStorage.getItem("userData");

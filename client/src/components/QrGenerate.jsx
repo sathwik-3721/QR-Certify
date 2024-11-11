@@ -22,12 +22,13 @@ import API from "@/services/API";
 import { ToastContainer, toast } from "react-toastify";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
+import miracleLogo from '../assets/miracle.png'
 
 const registerSchema = z.object({
   name: z.string().min(1, "Name is required"),   
   event: z.string().refine((val) => val !== "",{message : "Please select an event"}), 
   email: z.string().email("Invalid email address"), 
-  image: z.instanceof(File, "Profile picture is required"), 
+  image: z.string().min(10, "Profile picture is required"), 
 });
 
 export default function QrGenerate() {
@@ -107,15 +108,16 @@ export default function QrGenerate() {
   return (
     <div className="min-h-screen bg-gray-100 flex md:items-center md:justify-center">
       <ToastContainer />
-      <Card className={`w-full max-w-md rounded-xl h-fit mt-3 mx-2`}>
-        <CardHeader className="bg-[#00aae7] text-white rounded-t-xl">
-          <CardTitle className="text-2xl font-bold text-center">
-            {qrCodeData ? "Save this QR " : "Digital Summit Registration" }
+      <Card className={`w-full max-w-md rounded-xl h-fit mt-3 mx-2 py-2`}>
+        <CardHeader className="text-white rounded-t-xl p-2">
+          <div className="text-center mb-2 flex justify-center"><img src={miracleLogo} width={100} alt="miracle" /></div>
+          <CardTitle className="text-2xl font-bold text-center text-miracle-darkBlue">
+            {qrCodeData ? "Save Generated QR Code" : "Digital Summit Registration" }
           </CardTitle>
         </CardHeader>
-        <CardContent className="md:p-4 p-2 py-4">
+        <CardContent className="md:px-4 p-2">
           {qrCodeData ? (
-            <div className="mt-4 w-full flex justify-center">
+            <div className="w-full flex justify-center">
               <QRCodeSVG
                 value={qrCodeData}
                 size={200}
@@ -142,6 +144,20 @@ export default function QrGenerate() {
                 {errors.name && <p className="text-miracle-red text-sm">{errors.name}</p>}
               </div>
               <div className="space-y-2">
+                <Label htmlFor="email" className="text-gray-700">
+                  Email
+                </Label>
+                <Input
+                  id="email"
+                  name="email"
+                  type="email"
+                  value={formData.email}
+                  onChange={handleInputChange}
+                  className="border-gray-300 focus:border-[#00aae7] focus:ring-[#00aae7]"
+                />
+                {errors.email && <p className="text-miracle-red text-sm">{errors.email}</p>}
+              </div>
+              <div className="space-y-2">
                 <Label htmlFor="demo" className="text-gray-700">
                   Event
                 </Label>
@@ -165,23 +181,19 @@ export default function QrGenerate() {
                 {errors.event && <p className="text-miracle-red text-sm">{errors.event}</p>}
               </div>
               <div className="space-y-2">
-                <Label htmlFor="email" className="text-gray-700">
-                  Email
-                </Label>
-                <Input
-                  id="email"
-                  name="email"
-                  type="email"
-                  value={formData.email}
-                  onChange={handleInputChange}
-                  className="border-gray-300 focus:border-[#00aae7] focus:ring-[#00aae7]"
-                />
-                {errors.email && <p className="text-miracle-red text-sm">{errors.email}</p>}
-              </div>
-              <div className="space-y-2">
+                
                 <Label htmlFor="image" className="text-gray-700">
                   Profile Picture
                 </Label>
+                {formData.image !== "" && (
+                  <div className="mt-2 flex justify-center">
+                    <img
+                      src={formData.image}
+                      alt="Profile"
+                      className="w-32 h-32 object-cover rounded-full border-4 border-[#00aae7]"
+                    />
+                  </div>
+                )}
                 <Input
                   id="image"
                   name="image"
@@ -199,15 +211,7 @@ export default function QrGenerate() {
                   Upload Profile Picture
                 </Button>
                 {errors.image && <p className="text-miracle-red text-sm">{errors.image}</p>}
-                {formData.image !== "" && (
-                  <div className="mt-2 flex justify-center">
-                    <img
-                      src={formData.image}
-                      alt="Profile"
-                      className="w-32 h-32 object-cover rounded-full border-4 border-[#00aae7]"
-                    />
-                  </div>
-                )}
+   
               </div>
               {
                 isLoading

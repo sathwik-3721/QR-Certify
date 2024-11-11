@@ -78,7 +78,7 @@ export default function LoginForm({ setAuthenticated }) {
         <ToastContainer /> 
       <div className="flex justify-center mb-4">
         <span className="text-4xl font-bold text-miracle-darkBlue">
-          <span className="text-miracle-lightBlue">Digital </span>Submit
+          <span className="text-miracle-lightBlue">Digital </span>Summit
         </span>
       </div>
       <hr className="border-b border-[#B7B2B3] mb-6 sm:mb-8" />
