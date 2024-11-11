@@ -1,6 +1,6 @@
 import React, { useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
-import { Loader2 } from "lucide-react"
+import { Loader2,Upload,QrCodeIcon } from "lucide-react"
 import {
   Card,
   CardContent,
@@ -108,30 +108,31 @@ export default function QrGenerate() {
   return (
     <div className="min-h-screen bg-gray-100 flex md:items-center md:justify-center">
       <ToastContainer />
-      <Card className={`w-full max-w-md rounded-xl h-fit mt-3 mx-2 py-2`}>
+      <Card className={`w-full max-w-md rounded-xl h-fit mt-3 mx-2 p-2`}>
         <CardHeader className="text-white rounded-t-xl p-2">
           <div className="text-center mb-2 flex justify-center"><img src={miracleLogo} width={100} alt="miracle" /></div>
+         
           <CardTitle className="text-2xl font-bold text-center text-miracle-darkBlue">
-            {qrCodeData ? "Save Generated QR Code" : "Digital Summit Registration" }
+            {qrCodeData ? "Save Generated QR Code" : "DS-2024 Certificate Registration" }
           </CardTitle>
         </CardHeader>
         <CardContent className="md:px-4 p-2">
           {qrCodeData ? (
-            <div className="w-full flex justify-center">
+            <div className="w-full h-[400px] flex justify-center items-center">
               <QRCodeSVG
                 value={qrCodeData}
                 size={200}
                 level="H"
                 includeMargin={true}
                 bgColor="#ffffff"
-                fgColor="#00aae7"
+                fgColor="#232527"
               />
             </div>
           ) : (
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-2">
                 <Label htmlFor="name" className="text-gray-700">
-                  Name
+                  Full Name
                 </Label>
                 <Input
                   id="name"
@@ -183,7 +184,7 @@ export default function QrGenerate() {
               <div className="space-y-2">
                 
                 <Label htmlFor="image" className="text-gray-700">
-                  Profile Picture
+                  Image
                 </Label>
                 {formData.image !== "" && (
                   <div className="mt-2 flex justify-center">
@@ -206,9 +207,9 @@ export default function QrGenerate() {
                 <Button
                   type="button"
                   onClick={() => fileInputRef.current?.click()}
-                  className="w-full bg-[#2368a0] hover:bg-[#1c5280] text-white"
+                  className="w-full bg-[#ffffff] border border-gray-300 text-black"
                 >
-                  Upload Profile Picture
+                  <Upload className="h-5 w-5" />Upload Image
                 </Button>
                 {errors.image && <p className="text-miracle-red text-sm">{errors.image}</p>}
    
@@ -221,9 +222,9 @@ export default function QrGenerate() {
                   </Button>
                 : <Button
                     type="submit"
-                    className="w-full bg-[#00aae7] hover:bg-[#0088b9] text-white"
+                    className="w-full bg-[#0d416b] hover:bg-[#0088b9] text-white"
                   >
-                    Generate QR Code
+                    <QrCodeIcon className="h-5 w-5 font-bold" /> Generate QR Code
                   </Button>
               }
               

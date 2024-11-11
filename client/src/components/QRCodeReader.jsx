@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Camera, AlertCircle, LogOut, Mail, XCircle } from "lucide-react";
+import { Camera, AlertCircle, LogOut, Mail, XCircle,ScanLine } from "lucide-react";
 import miracleLogo from '../assets/miracle.png'
 import QrScanner from "qr-scanner";
 import {
@@ -255,12 +255,12 @@ export default function QRCodeReader({ setAuthenticated }) {
       <div className="px-2 md:items-center md:justify-center flex justify-center">
         <Card className="w-full max-w-md mt-5 h-fit pb-2 md:pb-2 rounded-xl p-2">
           <CardHeader className="text-white rounded-t-xl p-2">
-            <div className="mb-2 flex justify-between"><img src={miracleLogo} width={100} alt="miracle" /> <div className="flex justify-center items-center bg-miracle-lightBlue text-white rounded-full w-8 h-8"><LogOut
+            <div className="mb-3 flex justify-between"><div className="invisible">efefe</div><img src={miracleLogo} width={100} alt="miracle" /> <div className="flex justify-center items-center bg-miracle-lightBlue text-white rounded-full w-8 h-8"><LogOut
           onClick={handleLogout}
           className="h-4 w-4 cursor-pointer"
         /></div></div>
             <CardTitle className="text-2xl font-bold text-center text-miracle-darkBlue">
-              Digital Summit Scanner
+              DS-2024 Scanner
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4 md:px-4 p-2">
@@ -304,7 +304,7 @@ export default function QRCodeReader({ setAuthenticated }) {
             {fetchingState.includes("idle") || fetchingState.includes("fetching") || fetchingState.includes("sending") ? (
               <Button
                 onClick={isScanning ? stopScanning : startScanning}
-                className="w-full bg-[#00aae7] hover:bg-[#0088b9] text-white"
+                className="w-full bg-[#0d416b] hover:bg-[#0088b9] text-white"
                 disabled={fetchingState !== "idle"}
               >
                 {isScanning
@@ -313,7 +313,7 @@ export default function QRCodeReader({ setAuthenticated }) {
                   ? "Fetching Details..."
                   : fetchingState.includes("sending")
                   ? "Sending Mail..."
-                  : "Start Scanning"}
+                  : <span> <ScanLine className="h-5 w-5 inline mr-2" /> Start Scanning</span>}
               </Button>
             ) : (
               // <div className="flex justify-between">
