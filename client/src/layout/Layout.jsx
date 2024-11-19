@@ -1,11 +1,10 @@
 import { useEffect, useState } from "react";
 import { Route, Routes } from "react-router-dom";
-import Aside from "./aside/Aside";
-import Footer from "./footer/Footer";
-import Header from "./header/Header";
 import QRCodeReader from "@/components/QRCodeReader";
 import LoginForm from "@/components/LoginForm";
 import QrGenerate from "@/components/QrGenerate";
+import PdfTest from "@/components/PdfTest";
+import CertificatePdf from "@/components/CertificatePdf";
 
 
 
@@ -22,6 +21,7 @@ function Layout({authenticated, setAuthenticated}) {
           )}
 
           <Route path="/" element={<QrGenerate />} />
+          <Route path="/pdf" element={<CertificatePdf />} />
         </Routes>
       </div>
     </div>

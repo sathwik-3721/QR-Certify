@@ -28,7 +28,6 @@ const registerSchema = z.object({
   name: z.string().min(1, "Name is required"),   
   event: z.string().refine((val) => val !== "",{message : "Please select an event"}), 
   email: z.string().email("Invalid email address"), 
-  image: z.string().min(10, "Profile picture is required"), 
 });
 
 export default function QrGenerate() {
@@ -42,6 +41,16 @@ export default function QrGenerate() {
   const fileInputRef = useRef(null);
   const [isLoading,setIsLoading] = useState(false)
   const [errors,setErrors] = useState({})
+  const events = [
+    "Hands-On with Google AI Studio: From Gemini Models to Advanced Prompting",
+    "Integrating Gemini APIs with Python and Building a Chatbot App with Streamlit/Chainlit UI",
+    "Building Conversational Chatbots with Dialogflow CX",
+    "Building a Custom Search Engine with Google Programmable Search API",
+    "Building a Real-Time Live Chat Application with Socket.IO and MERN Stack",
+    "Custom Vision AI Object Detection for CAD Images using Azure Service",
+    "Deploying Applications Using Jenkins CICD Pipelines",
+    "Building a MERN Stack Web App: From CRUD APIs to React Integration"
+  ];
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -51,6 +60,10 @@ export default function QrGenerate() {
   const handleSelectChange = (value) => {
     setFormData((prev) => ({ ...prev, event: value }));
   };
+
+  const handleConfirmMail = () => {
+    
+  }
 
   const handleFileChange = (e) => {
     const file = e.target.files?.[0];
@@ -73,7 +86,6 @@ export default function QrGenerate() {
       name: formData.name,
       event: formData.event,
       email: formData.email,
-      image: formData.image, 
     };
     try {
       setIsLoading(true);
@@ -108,9 +120,9 @@ export default function QrGenerate() {
   return (
     <div className="min-h-screen bg-gray-100 flex md:items-center md:justify-center">
       <ToastContainer />
-      <Card className={`w-full max-w-md rounded-xl h-fit mt-3 mx-2 p-2`}>
-        <CardHeader className="text-white rounded-t-xl p-2">
-          <div className="text-center mb-2 flex justify-center"><img src={miracleLogo} width={100} alt="miracle" /></div>
+      <Card className={`w-full max-w-md rounded-xl min-h-[630px] max-h-full md:min-h-full md:h-fit mt-3 mx-2 p-2`}>
+        <CardHeader className="text-white rounded-t-xl p-2 mt-7 md:mt-0">
+          <div className="text-center mb-5 flex justify-center"><img src={miracleLogo} width={100} alt="miracle" /></div>
          
           <CardTitle className="text-2xl font-bold text-center text-miracle-darkBlue">
             {qrCodeData ? "Save Generated QR Code" : "DS-2024 Certificate Registration" }
@@ -159,6 +171,20 @@ export default function QrGenerate() {
                 {errors.email && <p className="text-miracle-red text-sm">{errors.email}</p>}
               </div>
               <div className="space-y-2">
+                <Label htmlFor="confirm-email" className="text-gray-700">
+                  Email
+                </Label>
+                <Input
+                  id="confirm-email"
+                  name="confirm-email"
+                  type="confirm-email"
+                  value={formData.email}
+                  onChange={handleConfirmMail}
+                  className="border-gray-300 focus:border-[#00aae7] focus:ring-[#00aae7]"
+                />
+                {errors.email && <p className="text-miracle-red text-sm">{errors.email}</p>}
+              </div>
+              <div className="space-y-2">
                 <Label htmlFor="demo" className="text-gray-700">
                   Event
                 </Label>
@@ -173,10 +199,13 @@ export default function QrGenerate() {
                     <SelectValue placeholder="Select a event" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="Tech Talks">Tech Talks</SelectItem>
+                    {
+                      events.map((event,indx) => <SelectItem key={indx} value={event}>{event}</SelectItem>)
+                    }
+                    {/* <SelectItem value="Tech Talks">Tech Talks</SelectItem>
                     <SelectItem value="Hands on">Hands on</SelectItem>
                     <SelectItem value="Demos">Demos</SelectItem>
-                    <SelectItem value="Quiz">Quiz</SelectItem>
+                    <SelectItem value="Quiz">Quiz</SelectItem> */}
                   </SelectContent>
                 </Select>
                 {errors.event && <p className="text-miracle-red text-sm">{errors.event}</p>}
@@ -207,7 +236,7 @@ export default function QrGenerate() {
                 <Button
                   type="button"
                   onClick={() => fileInputRef.current?.click()}
-                  className="w-full bg-[#ffffff] border border-gray-300 text-black"
+                  className="w-full bg-[#ffffff] border border-gray-300 hover:bg-slate-100 text-black"
                 >
                   <Upload className="h-5 w-5" />Upload Image
                 </Button>
@@ -222,7 +251,7 @@ export default function QrGenerate() {
                   </Button>
                 : <Button
                     type="submit"
-                    className="w-full bg-[#0d416b] hover:bg-[#0088b9] text-white"
+                    className="w-full bg-[#0d416b] hover:bg-[#0d416b]/90 text-white"
                   >
                     <QrCodeIcon className="h-5 w-5 font-bold" /> Generate QR Code
                   </Button>
@@ -231,7 +260,11 @@ export default function QrGenerate() {
             </form>
           )}
         </CardContent>
-
+        <CardFooter className="pt-3">
+        <div className="w-full flex items-center justify-center sm:mt-2">
+          Made with ❤️ at Miracle Labs
+        </div>
+        </CardFooter>
       </Card>
     </div>
   );

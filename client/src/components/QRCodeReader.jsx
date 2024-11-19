@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Camera, AlertCircle, LogOut, Mail, XCircle,ScanLine } from "lucide-react";
 import miracleLogo from '../assets/miracle.png'
@@ -16,94 +16,104 @@ import {
 } from "@react-pdf/renderer";
 import API from "@/services/API";
 import { ToastContainer, toast } from "react-toastify";
+import certificateImage from '../assets/certificate-bg.png'
 
 const styles = StyleSheet.create({
   page: {
-    backgroundColor: "#fff",
-    padding: 50,
+      backgroundColor: "#fff",
+      position:"relative",
+    },
+    imageContainer : {
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        width: '100%',
+        height: '600',
+        zIndex: -1, 
+    },
+    image : {
+        width: '100%',
+        height: '100%',
+    },
+    header: {
+      textAlign: "center",
+      fontSize: 50,
+      marginTop:100,
+      fontWeight:'bold',
+    },
+    header2 :{
+      fontSize: 30,
+      textAlign: "center",
+    },
+    section: {
+      textAlign: "center",
+      marginBottom: 20,
+    },
+  line : {
+    border:"4px solid black",
+    width:450,
+    marginLeft:200,
+    marginBottom:20,
+    marginTop:5
   },
-  header: {
-    textAlign: "center",
-    fontSize: 30,
-    marginBottom: 20,
-    fontWeight: "bold",
-  },
-  certificateText: {
-    textAlign: "center",
-    fontSize: 20,
-    marginBottom: 40,
-    fontStyle: "italic",
-  },
-  section: {
-    textAlign: "center",
-    marginBottom: 20,
-  },
-  details: {
-    fontSize: 16,
-    marginBottom: 10,
-  },
-  name: {
-    fontSize: 24,
-    fontWeight: "bold",
-    marginBottom: 20,
-  },
-  content: {
-    fontSize: 16,
-    marginBottom: 5,
-  },
-  imageContainer: {
-    textAlign: "center",
-    marginBottom: 20,
-  },
-  image: {
-    width: 150,
-    height: 150,
-    margin: "0 auto",
-  },
-  footer: {
-    textAlign: "center",
-    fontSize: 12,
-    marginTop: 30,
-    borderTop: "1px solid #000",
-    paddingTop: 10,
-  },
+    certificateText : {
+      textAlign:"center",
+      marginBottom:8,
+      fontFamily:"RobotoRegular"
+      },
+    details: {
+      fontSize: 16,
+      marginBottom: 10,
+    },
+    name: {
+      textAlign:"center",
+      fontSize: 30,
+      marginTop: 200,
+      fontStyle: "italic"
+    },
+    content: {
+      marginTop: 20,
+    },
+    footer: {
+      textAlign:"center",
+      marginBottom:15,
+      color:"gray"
+    },
+    year:{
+      fontSize:20,
+      fontFamily:"RobotoMedium"
+    }
 });
 
-const MyDocument = ({ data }) => (
+const MyDocument = ({data}) => (
   <Document>
-    <Page size="A4" style={styles.page}>
-      <View>
-        <Text style={styles.header}>Certificate of Participation</Text>
-        <Text style={styles.certificateText}>This is to certify that</Text>
-        <Text style={styles.name}>{data.name}</Text>
-        <Text style={styles.certificateText}>
-          has successfully participated in the event "{data.event}"
-        </Text>
-
-        <View style={styles.imageContainer}>
-          {data.image ? (
-            <Image style={styles.image} src={data.image} />
-          ) : (
-            <Text>No image available</Text>
-          )}
-        </View>
-
-        <View style={styles.section}>
-          <Text style={styles.details}>Email: {data.email}</Text>
-          <Text style={styles.details}>Event: {data.event}</Text>
-          <Text style={styles.details}>
-            Date: {new Date().toLocaleDateString()}
+  <Page size="A4" orientation="landscape" style={styles.page}>
+    <View>
+      <Text style={styles.name}>{data.name}</Text>
+      <View style={styles.content}>
+      <Text style={styles.certificateText}>
+          Attended
+      </Text>
+          <Text style={styles.certificateText}>
+           Integrating Gemini APIs with Python and Building a Chatbot App with Streamlit/Chainlit UI </Text>
+          <Text style={styles.certificateText}>at <Text style={styles.year}>Digital Summit'24</Text> from <Text style={styles.year}>December 19-21st, 2024</Text> at Miracle valley</Text>
+          <Text style={styles.certificateText}>
+          Visakhapatnam(AP)
           </Text>
-        </View>
-
-        <View style={styles.footer}>
-          <Text>Thank you for your participation!</Text>
-          <Text>Organization Name</Text>
-        </View>
+          <Text style={styles.footer}>
+          "Cloud","Cognitive","Blockchain","IoT","Machine Learning"
+          </Text>
+      </View>
+      
+      <View style={styles.imageContainer}>
+      <Image style={styles.image} src={certificateImage} />
+      </View>
       </View>
     </Page>
   </Document>
-);
+)
 
 export default function QRCodeReader({ setAuthenticated }) {
   const [scannedData, setScannedData] = useState(null);
@@ -253,8 +263,8 @@ export default function QRCodeReader({ setAuthenticated }) {
       </header> */}
       <ToastContainer />
       <div className="px-2 md:items-center md:justify-center flex justify-center">
-        <Card className="w-full max-w-md mt-5 h-fit pb-2 md:pb-2 rounded-xl p-2">
-          <CardHeader className="text-white rounded-t-xl p-2">
+        <Card className="w-full max-w-md md:mt-0 mt-3 min-h-[630px] max-h-full md:min-h-full pb-2 rounded-xl p-2">
+          <CardHeader className="text-white mt-7 rounded-t-xl p-2">
             <div className="mb-3 flex justify-between"><div className="invisible">efefe</div><img src={miracleLogo} width={100} alt="miracle" /> <div className="flex justify-center items-center bg-miracle-lightBlue text-white rounded-full w-8 h-8"><LogOut
           onClick={handleLogout}
           className="h-4 w-4 cursor-pointer"
@@ -304,7 +314,7 @@ export default function QRCodeReader({ setAuthenticated }) {
             {fetchingState.includes("idle") || fetchingState.includes("fetching") || fetchingState.includes("sending") ? (
               <Button
                 onClick={isScanning ? stopScanning : startScanning}
-                className="w-full bg-[#0d416b] hover:bg-[#0088b9] text-white"
+                className="w-full bg-[#0d416b] hover:bg-[#0d416b]/90 text-white"
                 disabled={fetchingState !== "idle"}
               >
                 {isScanning
@@ -388,6 +398,10 @@ export default function QRCodeReader({ setAuthenticated }) {
             </div>
           ) : null} */}
           </CardContent>
+            <div className="w-full flex items-center justify-center mt-16 md:mt-4">
+              Made with ❤️ at Miracle Labs
+            </div>
+
         </Card>
       </div>
     </div>

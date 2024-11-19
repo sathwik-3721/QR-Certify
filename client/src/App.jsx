@@ -6,7 +6,7 @@ import 'react-toastify/dist/ReactToastify.css';
 
 
 function App() {
-  const [authenticated, setAuthenticated] = useState(false);
+  const [authenticated, setAuthenticated] = useState(true);
 
   useEffect(() => {
     const user = localStorage.getItem("userData");
