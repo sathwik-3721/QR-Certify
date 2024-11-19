@@ -61,9 +61,9 @@ export default function QrGenerate() {
     setFormData((prev) => ({ ...prev, event: value }));
   };
 
-  const handleConfirmMail = () => {
-    
-  }
+  // const handleConfirmMail = () => {
+
+  // }
 
   const handleFileChange = (e) => {
     const file = e.target.files?.[0];
@@ -120,7 +120,7 @@ export default function QrGenerate() {
   return (
     <div className="min-h-screen bg-gray-100 flex md:items-center md:justify-center">
       <ToastContainer />
-      <Card className={`w-full max-w-md rounded-xl min-h-[630px] max-h-full md:min-h-full md:h-fit mt-3 mx-2 p-2`}>
+      <Card className={`w-full max-w-md rounded-xl h-fit md:h-fit mt-3 mx-2 p-2`}>
         <CardHeader className="text-white rounded-t-xl p-2 mt-7 md:mt-0">
           <div className="text-center mb-5 flex justify-center"><img src={miracleLogo} width={100} alt="miracle" /></div>
          
@@ -170,7 +170,7 @@ export default function QrGenerate() {
                 />
                 {errors.email && <p className="text-miracle-red text-sm">{errors.email}</p>}
               </div>
-              <div className="space-y-2">
+              {/* <div className="space-y-2">
                 <Label htmlFor="confirm-email" className="text-gray-700">
                   Email
                 </Label>
@@ -183,7 +183,7 @@ export default function QrGenerate() {
                   className="border-gray-300 focus:border-[#00aae7] focus:ring-[#00aae7]"
                 />
                 {errors.email && <p className="text-miracle-red text-sm">{errors.email}</p>}
-              </div>
+              </div> */}
               <div className="space-y-2">
                 <Label htmlFor="demo" className="text-gray-700">
                   Event

@@ -3,7 +3,6 @@ import { Route, Routes } from "react-router-dom";
 import QRCodeReader from "@/components/QRCodeReader";
 import LoginForm from "@/components/LoginForm";
 import QrGenerate from "@/components/QrGenerate";
-import PdfTest from "@/components/PdfTest";
 import CertificatePdf from "@/components/CertificatePdf";
 
 

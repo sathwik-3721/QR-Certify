@@ -263,7 +263,7 @@ export default function QRCodeReader({ setAuthenticated }) {
       </header> */}
       <ToastContainer />
       <div className="px-2 md:items-center md:justify-center flex justify-center">
-        <Card className="w-full max-w-md md:mt-0 mt-3 min-h-[630px] max-h-full md:min-h-full pb-2 rounded-xl p-2">
+        <Card className="w-full max-w-md md:mt-0 mt-3 max-h-full rounded-xl p-2 pb-12 relative">
           <CardHeader className="text-white mt-7 rounded-t-xl p-2">
             <div className="mb-3 flex justify-between"><div className="invisible">efefe</div><img src={miracleLogo} width={100} alt="miracle" /> <div className="flex justify-center items-center bg-miracle-lightBlue text-white rounded-full w-8 h-8"><LogOut
           onClick={handleLogout}
@@ -274,7 +274,9 @@ export default function QRCodeReader({ setAuthenticated }) {
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4 md:px-4 p-2">
-            <div className="relative aspect-video bg-miracle-mediumBlue/50 rounded-lg overflow-hidden h-[300px] w-full md:w-full md:h-[400px]">
+            {
+              details.email === "" &&
+              <div className="relative aspect-video bg-miracle-mediumBlue/50 rounded-lg overflow-hidden h-[300px] w-full md:w-full md:h-[400px]">
               <video ref={videoRef} className="w-full h-full object-cover" />
               {!isScanning && (
                 <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50">
@@ -282,6 +284,7 @@ export default function QRCodeReader({ setAuthenticated }) {
                 </div>
               )}
             </div>
+            }
 
             {error && (
               <Alert variant="destructive">
@@ -293,14 +296,7 @@ export default function QRCodeReader({ setAuthenticated }) {
 
 
             {details.email !== "" && (
-              <div className="flex justify-between">
-                <div className="text-sm">
-                  <h2 className="font-semibold">User Details</h2>
-                  <p>Name: {details.name}</p>
-                  <p>Email: {details.email.substring(0,details.email.lastIndexOf('@')).length > 13 ? details.email.substring(0,5) + "***" + details.email.substring(details.email.lastIndexOf('@') - 5) : details.email}</p>
-                  <p>Demo: {details.event}</p>
-                  {details.issued && <p><span className="text-green-700 font-semibold">Certificate Issued</span>  </p>}
-                </div>
+              <div className="flex flex-col justify-between">
                 <div className="flex justify-center items-center">
                   <img
                     src={details.image}
@@ -308,13 +304,21 @@ export default function QRCodeReader({ setAuthenticated }) {
                     className="w-20 h-20 object-cover rounded-full border-4 border-[#00aae7]"
                   />
                 </div>
+                <div className="text-sm">
+                  <h2 className="font-semibold">User Details</h2>
+                  <p>Name: {details.name}</p>
+                  <p>Email: {details.email.substring(0,details.email.lastIndexOf('@')).length > 13 ? details.email.substring(0,5) + "***" + details.email.substring(details.email.lastIndexOf('@') - 5) : details.email}</p>
+                  <p>Demo: {details.event}</p>
+                  {details.issued && <p><span className="text-green-700 font-semibold">Certificate Issued</span>  </p>}
+                </div>
+                
               </div>
             )}
 
             {fetchingState.includes("idle") || fetchingState.includes("fetching") || fetchingState.includes("sending") ? (
               <Button
                 onClick={isScanning ? stopScanning : startScanning}
-                className="w-full bg-[#0d416b] hover:bg-[#0d416b]/90 text-white"
+                className="w-full bg-[#0d416b] hover:bg-[#0d416b]/90"
                 disabled={fetchingState !== "idle"}
               >
                 {isScanning
@@ -398,10 +402,10 @@ export default function QRCodeReader({ setAuthenticated }) {
             </div>
           ) : null} */}
           </CardContent>
-            <div className="w-full flex items-center justify-center mt-16 md:mt-4">
+          <CardFooter className="absolute bottom-0 p-2 w-full left-0"><div className="w-full flex items-center justify-center">
               Made with ❤️ at Miracle Labs
             </div>
-
+            </CardFooter>
         </Card>
       </div>
     </div>
