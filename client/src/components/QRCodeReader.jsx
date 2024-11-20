@@ -16,7 +16,7 @@ import {
 } from "@react-pdf/renderer";
 import API from "@/services/API";
 import { ToastContainer, toast } from "react-toastify";
-import certificateImage from '../assets/certificate-bg.png'
+import certificateImage from '../assets/certificate-bg2.png'
 
 const styles = StyleSheet.create({
   page: {
@@ -97,8 +97,8 @@ const MyDocument = ({data}) => (
           Attended
       </Text>
           <Text style={styles.certificateText}>
-           Integrating Gemini APIs with Python and Building a Chatbot App with Streamlit/Chainlit UI </Text>
-          <Text style={styles.certificateText}>at <Text style={styles.year}>Digital Summit'24</Text> from <Text style={styles.year}>December 19-21st, 2024</Text> at Miracle valley</Text>
+           {data.event} </Text>
+          <Text style={styles.certificateText}>at <Text style={styles.year}>Digital Summit'24</Text> from <Text style={styles.year}>December 19-21st, 2024</Text> at Miracle City</Text>
           <Text style={styles.certificateText}>
           Visakhapatnam(AP)
           </Text>
@@ -153,7 +153,7 @@ export default function QRCodeReader({ setAuthenticated }) {
 
   const generateAndSendPDF = async () => {
     try {
-      setFetchingState("generating certificate");
+      setFetchingState("sending certificate");
       const pdfBlob = await pdf(<MyDocument data={details} />).toBlob(); // Generate PDF blob
       // setPdfBlob(pdfBlob); // Set the generated PDF blob
       await sendPDFToBackend(details, pdfBlob); // Send PDF to backend
@@ -178,14 +178,14 @@ export default function QRCodeReader({ setAuthenticated }) {
       setDetails(result);
     } catch (err) {
       console.log(err);
-      toast.error("Error while fechin details");
+      toast.error("Error while feching details"+err);
+      setFetchingState("fetched");
     }
   };
 
   const sendPDFToBackend = async (data, pdfBlob) => {
     try {
       if (pdfBlob instanceof Blob) {
-        setFetchingState("sending certificate");
         console.log("Valid Blob:", pdfBlob, data.email);
         const formData = new FormData();
         formData.append("name", data.name);
@@ -254,7 +254,7 @@ export default function QRCodeReader({ setAuthenticated }) {
   },[fetchingState])
 
   return (
-    <div className="min-h-screen bg-gray-100 flex flex-col md:justify-center">
+    <div className="min-h-screen bg-gray-100 flex items-center justify-center px-2">
       {/* <header className="bg-white shadow-md py-4 2xl:px-8 p-2 flex justify-end">
         <LogOut
           onClick={handleLogout}
@@ -262,8 +262,7 @@ export default function QRCodeReader({ setAuthenticated }) {
         />
       </header> */}
       <ToastContainer />
-      <div className="px-2 md:items-center md:justify-center flex justify-center">
-        <Card className="w-full max-w-md md:mt-0 mt-3 max-h-full rounded-xl p-2 pb-12 relative">
+        <Card className="w-full max-w-md md:mt-0 mt-3 h-[600px] rounded-xl p-2 pb-12 relative">
           <CardHeader className="text-white mt-7 rounded-t-xl p-2">
             <div className="mb-3 flex justify-between"><div className="invisible">efefe</div><img src={miracleLogo} width={100} alt="miracle" /> <div className="flex justify-center items-center bg-miracle-lightBlue text-white rounded-full w-8 h-8"><LogOut
           onClick={handleLogout}
@@ -276,7 +275,7 @@ export default function QRCodeReader({ setAuthenticated }) {
           <CardContent className="space-y-4 md:px-4 p-2">
             {
               details.email === "" &&
-              <div className="relative aspect-video bg-miracle-mediumBlue/50 rounded-lg overflow-hidden h-[300px] w-full md:w-full md:h-[400px]">
+              <div className="relative aspect-video bg-miracle-mediumBlue/50 rounded-lg overflow-hidden h-[300px] w-full">
               <video ref={videoRef} className="w-full h-full object-cover" />
               {!isScanning && (
                 <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50">
@@ -305,11 +304,42 @@ export default function QRCodeReader({ setAuthenticated }) {
                   />
                 </div>
                 <div className="text-sm">
-                  <h2 className="font-semibold">User Details</h2>
-                  <p>Name: {details.name}</p>
-                  <p>Email: {details.email.substring(0,details.email.lastIndexOf('@')).length > 13 ? details.email.substring(0,5) + "***" + details.email.substring(details.email.lastIndexOf('@') - 5) : details.email}</p>
-                  <p>Demo: {details.event}</p>
-                  {details.issued && <p><span className="text-green-700 font-semibold">Certificate Issued</span>  </p>}
+                  <table className="border-collaps">
+                    <tbody>
+                      <tr className=" border-gray-200">
+                        <td className="py-4 font-semibold text-gray-700">Name</td>
+                        <td className="py-4 text-gray-600">:</td>
+                        <td className="py-4 text-gray-600">{details.name}</td>
+                      </tr>
+                      <tr className=" border-gray-200">
+                        <td className="py-4 font-semibold text-gray-700">Email</td>
+                        <td className="py-4 text-gray-600">:</td>
+                        <td className="py-4 text-gray-600">
+                          {details.email.substring(0, details.email.lastIndexOf('@')).length > 13
+                            ? details.email.substring(0, 5) + '***' + details.email.substring(details.email.lastIndexOf('@') - 5)
+                            : details.email}
+                        </td>
+                      </tr>
+                      <tr>
+                        <td className="py-4 font-semibold text-gray-700 align-top">Event</td>
+                        <td className="py-4 text-gray-600 align-top">:</td>
+                        <td className="py-4 text-gray-600">{details.event}</td>
+                      </tr>
+                      {
+                        details.issued && <tr>
+                        <td className="py-4 font-semibold text-gray-700 align-top">Status</td>
+                        <td className="py-4 text-gray-600 align-top">:</td>
+                        <td className="py-4 text-gray-600"><span className="text-green-700 font-semibold">Certificate Issued</span></td>
+                      </tr>
+                      }
+                      
+                    </tbody>
+                  </table>
+                  {/* {details.issued && <p><span className="text-green-700 font-semibold">Certificate Issued</span>  </p>} */}
+                  {/* <p className="flex"><span className="w-[50px] inline-block">Name</span> : {details.name}</p>
+                  <p className="flex"><span className="w-[50px] inline-block">Email</span> : {details.email.substring(0,details.email.lastIndexOf('@')).length > 13 ? details.email.substring(0,5) + "***" + details.email.substring(details.email.lastIndexOf('@') - 5) : details.email}</p>
+                  <p className="flex"><span className="w-[50px] inline-block">Demo</span> {": " +details.event}</p>
+                   */}
                 </div>
                 
               </div>
@@ -325,6 +355,8 @@ export default function QRCodeReader({ setAuthenticated }) {
                   ? "Stop Scanning"
                   : fetchingState.includes("fetching")
                   ? "Fetching Details..."
+                  : fetchingState.includes("generating")
+                  ? "Generating Pdf..."
                   : fetchingState.includes("sending")
                   ? "Sending Mail..."
                   : <span> <ScanLine className="h-5 w-5 inline mr-2" /> Start Scanning</span>}
@@ -402,12 +434,12 @@ export default function QRCodeReader({ setAuthenticated }) {
             </div>
           ) : null} */}
           </CardContent>
-          <CardFooter className="absolute bottom-0 p-2 w-full left-0"><div className="w-full flex items-center justify-center">
+          <CardFooter className="absolute bottom-0 p-2 w-full left-0">
+            <div className="w-full flex items-center justify-center">
               Made with ❤️ at Miracle Labs
             </div>
             </CardFooter>
         </Card>
-      </div>
     </div>
   );
 }

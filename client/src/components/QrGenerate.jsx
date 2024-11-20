@@ -54,10 +54,12 @@ export default function QrGenerate() {
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
+    setErrors({...errors,[name] : null})
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleSelectChange = (value) => {
+    setErrors({...errors,event : null})
     setFormData((prev) => ({ ...prev, event: value }));
   };
 
@@ -88,6 +90,7 @@ export default function QrGenerate() {
       email: formData.email,
     };
     try {
+      setErrors({})
       setIsLoading(true);
       registerSchema.parse(formDataToValidate);
       const result = await API.post.register(formData);

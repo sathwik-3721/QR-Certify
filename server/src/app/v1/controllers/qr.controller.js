@@ -184,7 +184,7 @@ export async function getDetails(req, res) {
           return res.status(200).send(result)
           },1000)
         }
-        // throw {status : 404 , message : "User details not found"}
+        throw {status : 404 , message : "User details not found"}
     } catch(error) {
         console.error("An error occurred in uploadData function:", error);
         if (error.status) {
