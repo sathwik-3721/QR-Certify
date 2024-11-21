@@ -154,9 +154,9 @@ export default function QRCodeReader({ setAuthenticated }) {
   const generateAndSendPDF = async () => {
     try {
       setFetchingState("sending certificate");
-      const pdfBlob = await pdf(<MyDocument data={details} />).toBlob(); // Generate PDF blob
+      // const pdfBlob = await pdf(<MyDocument data={details} />).toBlob(); 
       // setPdfBlob(pdfBlob); // Set the generated PDF blob
-      await sendPDFToBackend(details, pdfBlob); // Send PDF to backend
+      await sendPDFToBackend(details); // Send PDF to backend
     } catch (error) {
       toast.error("Error while generating certificate")
       console.log("Error generating PDF:", error);
@@ -183,19 +183,19 @@ export default function QRCodeReader({ setAuthenticated }) {
     }
   };
 
-  const sendPDFToBackend = async (data, pdfBlob) => {
+  const sendPDFToBackend = async (data) => {
     try {
-      if (pdfBlob instanceof Blob) {
-        console.log("Valid Blob:", pdfBlob, data.email);
-        const formData = new FormData();
-        formData.append("name", data.name);
-        formData.append("event", data.event);
-        formData.append("email", data.email);
-        formData.append("pdf", pdfBlob, "certificate.pdf");
-        const response = await API.post.sendCertificate(formData);
+      // if (pdfBlob instanceof Blob) {
+        console.log("Valid Blob:", data.email);
+        // const formData = new FormData();
+        // formData.append("name", data.name);
+        // formData.append("event", data.event);
+        // formData.append("email", data.email);
+        // formData.append("pdf", pdfBlob, "certificate.pdf");
+        const response = await API.post.sendCertificate(data);
         setDetails(initialState)
         toast.success("Mail sent successfully");
-      }
+      // }
     } catch (err) {
       console.log(err);
       toast.error("Failed to send mail");
@@ -254,7 +254,7 @@ export default function QRCodeReader({ setAuthenticated }) {
   },[fetchingState])
 
   return (
-    <div className="min-h-screen bg-gray-100 flex items-center justify-center px-2">
+    <div className="min-h-screen bg-gray-100 flex items-start justify-center px-2">
       {/* <header className="bg-white shadow-md py-4 2xl:px-8 p-2 flex justify-end">
         <LogOut
           onClick={handleLogout}
@@ -262,9 +262,9 @@ export default function QRCodeReader({ setAuthenticated }) {
         />
       </header> */}
       <ToastContainer />
-        <Card className="w-full max-w-md md:mt-0 mt-3 h-[600px] rounded-xl p-2 pb-12 relative">
+        <Card className="w-full max-w-md md:mt-0 mt-3 h-[670px] rounded-xl p-2 pb-12 relative">
           <CardHeader className="text-white mt-7 rounded-t-xl p-2">
-            <div className="mb-3 flex justify-between"><div className="invisible">efefe</div><img src={miracleLogo} width={100} alt="miracle" /> <div className="flex justify-center items-center bg-miracle-lightBlue text-white rounded-full w-8 h-8"><LogOut
+            <div className="mb-3 flex justify-between items-center"><div className="invisible">efefe</div><img src={miracleLogo} width={150} alt="miracle" /> <div className="flex justify-center items-center bg-miracle-lightBlue text-white rounded-full w-8 h-8"><LogOut
           onClick={handleLogout}
           className="h-4 w-4 cursor-pointer"
         /></div></div>
@@ -275,10 +275,11 @@ export default function QRCodeReader({ setAuthenticated }) {
           <CardContent className="space-y-4 md:px-4 p-2">
             {
               details.email === "" &&
-              <div className="relative aspect-video bg-miracle-mediumBlue/50 rounded-lg overflow-hidden h-[300px] w-full">
+              <div className="relative aspect-video bg-black rounded-lg overflow-hidden h-[300px] w-full">
               <video ref={videoRef} className="w-full h-full object-cover" />
+              {isScanning && <div className="absolute inset-0 flex items-center justify-center bg-miracle-lightBlue h-[2px] w-[93%] mx-auto animate-upDown"></div> }
               {!isScanning && (
-                <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50">
+                <div className="absolute inset-0 flex items-center justify-center bg-black">
                   <Camera className="w-16 h-16 text-miracle-white opacity-50" />
                 </div>
               )}
@@ -300,11 +301,11 @@ export default function QRCodeReader({ setAuthenticated }) {
                   <img
                     src={details.image}
                     alt="Profile"
-                    className="w-20 h-20 object-cover rounded-full border-4 border-[#00aae7]"
+                    className="w-32 h-32 object-cover rounded-full border-4 border-[#00aae7]"
                   />
                 </div>
-                <div className="text-sm">
-                  <table className="border-collaps">
+                <div className="mt-2">
+                  {/* <table className="border-collaps">
                     <tbody>
                       <tr className=" border-gray-200">
                         <td className="py-4 font-semibold text-gray-700">Name</td>
@@ -334,12 +335,12 @@ export default function QRCodeReader({ setAuthenticated }) {
                       }
                       
                     </tbody>
-                  </table>
-                  {/* {details.issued && <p><span className="text-green-700 font-semibold">Certificate Issued</span>  </p>} */}
-                  {/* <p className="flex"><span className="w-[50px] inline-block">Name</span> : {details.name}</p>
-                  <p className="flex"><span className="w-[50px] inline-block">Email</span> : {details.email.substring(0,details.email.lastIndexOf('@')).length > 13 ? details.email.substring(0,5) + "***" + details.email.substring(details.email.lastIndexOf('@') - 5) : details.email}</p>
-                  <p className="flex"><span className="w-[50px] inline-block">Demo</span> {": " +details.event}</p>
-                   */}
+                  </table> */}
+                  <p className="text-center text-lg font-bold">{details.name.charAt(0).toLocaleUpperCase() + details.name.substring(1)}</p>
+                  <p className="text-center mt-1">{details.email.substring(0,details.email.lastIndexOf('@')).length > 13 ? details.email.substring(0,5) + "***" + details.email.substring(details.email.lastIndexOf('@') - 5) : details.email}</p>
+                  <p className="text-center mt-1 text-gray-400 font-bold">{details.event}</p>
+                  {details.issued && <p className="text-green-700 font-semibold text-center mt-1">Certificate Issued</p>}
+                  
                 </div>
                 
               </div>

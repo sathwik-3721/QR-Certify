@@ -80,10 +80,15 @@ module.exports = {
           from: { height: "var(--radix-accordion-content-height)" },
           to: { height: "0" },
         },
+        "upDown": {
+          '0%, 100%': { transform: 'translateY(0)' },
+          '50%': { transform: 'translateY(300px)' },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
+        "upDown": 'upDown 7s ease-in-out infinite',
       },
     },
   },
