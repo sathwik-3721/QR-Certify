@@ -1,6 +1,6 @@
 import React, { useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
-import { Loader2,Upload,QrCodeIcon } from "lucide-react";
+import { Loader2,Upload,QrCodeIcon, ArrowLeft } from "lucide-react";
 import {
   Card,
   CardContent,
@@ -41,6 +41,7 @@ export default function QrGenerate() {
   const fileInputRef = useRef(null);
   const [isLoading,setIsLoading] = useState(false)
   const [errors,setErrors] = useState({})
+  const [showQr,setShowQr] = useState(false)
   const events = [
     "Hands-On with Google AI Studio: From Gemini Models to Advanced Prompting",
     "Integrating Gemini APIs with Python and Building a Chatbot App with Streamlit/Chainlit UI",
@@ -95,6 +96,13 @@ export default function QrGenerate() {
       let { image, ...rest } = formData;
       const dataString = JSON.stringify(rest);
       setQRCodeData(dataString);
+      setFormData({
+        name: "",
+        event: "",
+        email: "",
+        image: "",
+      })
+      setShowQr(true);
     } catch (err) {
       if(err instanceof z.ZodError){
         const formattedErrors = err.errors.reduce((acc, error) => {
@@ -123,12 +131,12 @@ export default function QrGenerate() {
       <Card className={`w-full relative max-w-md rounded-xl h-full border-0 shadow-none overflow-hidden`}>
         <CardHeader className="text-white rounded-t-xl mt-3 p-2 md:mt-0">
           <div className="text-center mb-5 flex justify-center"><img src={miracleLogo} width={150} alt="miracle" /></div>
-         
+          
           <CardTitle className="text-2xl font-bold text-center text-miracle-darkBlue">
             {qrCodeData ? "Save Generated QR Code" : "DS-2024 Certificate Registration" }
           </CardTitle>
         </CardHeader>
-        <div className={`flex transition-transform duration-500 ease-in-out min-w-full ${qrCodeData ? "-translate-x-full" : "translate-x-0"}`}>
+        <div className={`flex transition-transform duration-500 ease-in-out min-w-full ${showQr ? "-translate-x-full" : "translate-x-0"}`}>
         <CardContent className={`md:px-4 p-2 min-w-full`}>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-2">
@@ -159,20 +167,6 @@ export default function QrGenerate() {
                 />
                 {errors.email && <p className="text-miracle-red text-sm">{errors.email}</p>}
               </div>
-              {/* <div className="space-y-2">
-                <Label htmlFor="confirm-email" className="text-gray-700">
-                  Email
-                </Label>
-                <Input
-                  id="confirm-email"
-                  name="confirm-email"
-                  type="confirm-email"
-                  value={formData.email}
-                  onChange={handleConfirmMail}
-                  className="border-gray-300 focus:border-[#00aae7] focus:ring-[#00aae7]"
-                />
-                {errors.email && <p className="text-miracle-red text-sm">{errors.email}</p>}
-              </div> */}
               <div className="space-y-2">
                 <Label htmlFor="demo" className="text-gray-700">
                   Event
@@ -191,10 +185,6 @@ export default function QrGenerate() {
                     {
                       events.map((event,indx) => <SelectItem key={indx} value={event}>{event}</SelectItem>)
                     }
-                    {/* <SelectItem value="Tech Talks">Tech Talks</SelectItem>
-                    <SelectItem value="Hands on">Hands on</SelectItem>
-                    <SelectItem value="Demos">Demos</SelectItem>
-                    <SelectItem value="Quiz">Quiz</SelectItem> */}
                   </SelectContent>
                 </Select>
                 {errors.event && <p className="text-miracle-red text-sm">{errors.event}</p>}
@@ -235,7 +225,7 @@ export default function QrGenerate() {
               {
                 isLoading
                 ? <Button className="w-full bg-miracle-darkBlue hover:bg-miracle-darkBlue" disabled>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    <Loader2 className="mr-1 h-4 w-4 animate-spin" />
                     generating...
                   </Button>
                 : <Button
@@ -261,6 +251,9 @@ export default function QrGenerate() {
               />
             </div>
           )}
+          <div onClick={() => setShowQr(false)} className="flex justify-center text-white bg-miracle-darkBlue w-[180px] py-1 px-2 rounded-lg mx-auto">
+            <ArrowLeft className="mr-1" /> Back
+          </div>
         </CardContent>
         </div>
 
