@@ -14,11 +14,9 @@ function App() {
   },[authenticated])
 
   return (
-    <>
-        <div className="h-full w-full">
+        <div className="h-dvh w-full">
           <Layout authenticated={authenticated} setAuthenticated={setAuthenticated} />
         </div>
-    </>
   );
 }
 

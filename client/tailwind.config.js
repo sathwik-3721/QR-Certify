@@ -82,7 +82,7 @@ module.exports = {
         },
         "upDown": {
           '0%, 100%': { transform: 'translateY(0)' },
-          '50%': { transform: 'translateY(300px)' },
+          '50%': { transform: 'translateY(400px)' },
         },
       },
       animation: {

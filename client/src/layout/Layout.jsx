@@ -9,9 +9,7 @@ import CertificatePdf from "@/components/CertificatePdf";
 
 function Layout({authenticated, setAuthenticated}) {
   return (
-    <div className="h-full w-full flex transition-all">
-      {/* <Header/> */}
-      <div className={` h-full w-full `}>
+    <div className="h-full transition-all w-full">
         <Routes>
           {authenticated ? (
             <Route path="/scanner" element={<QRCodeReader setAuthenticated={setAuthenticated} />} />
@@ -22,7 +20,6 @@ function Layout({authenticated, setAuthenticated}) {
           <Route path="/" element={<QrGenerate />} />
           <Route path="/pdf" element={<CertificatePdf />} />
         </Routes>
-      </div>
     </div>
   );
 }

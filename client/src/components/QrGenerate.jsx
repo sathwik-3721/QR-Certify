@@ -1,6 +1,6 @@
 import React, { useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
-import { Loader2,Upload,QrCodeIcon } from "lucide-react"
+import { Loader2,Upload,QrCodeIcon } from "lucide-react";
 import {
   Card,
   CardContent,
@@ -63,9 +63,6 @@ export default function QrGenerate() {
     setFormData((prev) => ({ ...prev, event: value }));
   };
 
-  // const handleConfirmMail = () => {
-
-  // }
 
   const handleFileChange = (e) => {
     const file = e.target.files?.[0];
@@ -121,29 +118,18 @@ export default function QrGenerate() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 flex md:items-center md:justify-center">
+    <div className="h-full flex md:items-center md:justify-center">
       <ToastContainer />
-      <Card className={`w-full max-w-md rounded-xl h-fit md:h-fit mt-3 mx-2 p-2`}>
-        <CardHeader className="text-white rounded-t-xl p-2 mt-7 md:mt-0">
-          <div className="text-center mb-5 flex justify-center"><img src={miracleLogo} width={100} alt="miracle" /></div>
+      <Card className={`w-full relative max-w-md rounded-xl h-full border-0 shadow-none overflow-hidden`}>
+        <CardHeader className="text-white rounded-t-xl mt-3 p-2 md:mt-0">
+          <div className="text-center mb-5 flex justify-center"><img src={miracleLogo} width={150} alt="miracle" /></div>
          
           <CardTitle className="text-2xl font-bold text-center text-miracle-darkBlue">
             {qrCodeData ? "Save Generated QR Code" : "DS-2024 Certificate Registration" }
           </CardTitle>
         </CardHeader>
-        <CardContent className="md:px-4 p-2">
-          {qrCodeData ? (
-            <div className="w-full h-[400px] flex justify-center items-center">
-              <QRCodeSVG
-                value={qrCodeData}
-                size={200}
-                level="H"
-                includeMargin={true}
-                bgColor="#ffffff"
-                fgColor="#232527"
-              />
-            </div>
-          ) : (
+        <div className={`flex transition-transform duration-500 ease-in-out min-w-full ${qrCodeData ? "-translate-x-full" : "translate-x-0"}`}>
+        <CardContent className={`md:px-4 p-2 min-w-full`}>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-2">
                 <Label htmlFor="name" className="text-gray-700">
@@ -223,7 +209,7 @@ export default function QrGenerate() {
                     <img
                       src={formData.image}
                       alt="Profile"
-                      className="w-32 h-32 object-cover rounded-full border-4 border-[#00aae7]"
+                      className="w-24 h-24 object-cover rounded-full border-4 border-[#00aae7]"
                     />
                   </div>
                 )}
@@ -248,26 +234,39 @@ export default function QrGenerate() {
               </div>
               {
                 isLoading
-                ? <Button className="w-full bg-[#00aae7]" disabled>
+                ? <Button className="w-full bg-miracle-darkBlue hover:bg-miracle-darkBlue" disabled>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Please wait
+                    generating...
                   </Button>
                 : <Button
                     type="submit"
-                    className="w-full bg-[#0d416b] hover:bg-[#0d416b]/90 text-white"
+                    className="w-full bg-[#0d416b] hover:bg-miracle-darkBlue/90 text-white"
                   >
                     <QrCodeIcon className="h-5 w-5 font-bold" /> Generate QR Code
                   </Button>
               }
               
             </form>
+        </CardContent>
+        <CardContent className="md:px-4 p-2 min-w-full">
+          {qrCodeData && (
+            <div className="w-full h-[400px] flex justify-center items-center">
+              <QRCodeSVG
+                value={qrCodeData}
+                size={200}
+                level="H"
+                includeMargin={true}
+                bgColor="#ffffff"
+                fgColor="#232527"
+              />
+            </div>
           )}
         </CardContent>
-        <CardFooter className="pt-3">
-        <div className="w-full flex items-center justify-center sm:mt-2">
+        </div>
+
+        <div className="w-full flex items-center justify-center text-sm text-gray-500 absolute bottom-0">
           Made with ❤️ at Miracle Labs
         </div>
-        </CardFooter>
       </Card>
     </div>
   );

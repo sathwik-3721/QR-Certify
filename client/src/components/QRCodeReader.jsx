@@ -2,118 +2,12 @@ import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Camera, AlertCircle, LogOut, Mail, XCircle,ScanLine } from "lucide-react";
+import { Camera, AlertCircle, LogOut, Mail,Loader2, ArrowLeft,ScanLine } from "lucide-react";
 import miracleLogo from '../assets/miracle.png'
+
 import QrScanner from "qr-scanner";
-import {
-  Document,
-  Page,
-  Text,
-  View,
-  Image,
-  StyleSheet,
-  pdf,
-} from "@react-pdf/renderer";
 import API from "@/services/API";
 import { ToastContainer, toast } from "react-toastify";
-import certificateImage from '../assets/certificate-bg2.png'
-
-const styles = StyleSheet.create({
-  page: {
-      backgroundColor: "#fff",
-      position:"relative",
-    },
-    imageContainer : {
-        position: 'absolute',
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
-        width: '100%',
-        height: '600',
-        zIndex: -1, 
-    },
-    image : {
-        width: '100%',
-        height: '100%',
-    },
-    header: {
-      textAlign: "center",
-      fontSize: 50,
-      marginTop:100,
-      fontWeight:'bold',
-    },
-    header2 :{
-      fontSize: 30,
-      textAlign: "center",
-    },
-    section: {
-      textAlign: "center",
-      marginBottom: 20,
-    },
-  line : {
-    border:"4px solid black",
-    width:450,
-    marginLeft:200,
-    marginBottom:20,
-    marginTop:5
-  },
-    certificateText : {
-      textAlign:"center",
-      marginBottom:8,
-      fontFamily:"RobotoRegular"
-      },
-    details: {
-      fontSize: 16,
-      marginBottom: 10,
-    },
-    name: {
-      textAlign:"center",
-      fontSize: 30,
-      marginTop: 200,
-      fontStyle: "italic"
-    },
-    content: {
-      marginTop: 20,
-    },
-    footer: {
-      textAlign:"center",
-      marginBottom:15,
-      color:"gray"
-    },
-    year:{
-      fontSize:20,
-      fontFamily:"RobotoMedium"
-    }
-});
-
-const MyDocument = ({data}) => (
-  <Document>
-  <Page size="A4" orientation="landscape" style={styles.page}>
-    <View>
-      <Text style={styles.name}>{data.name}</Text>
-      <View style={styles.content}>
-      <Text style={styles.certificateText}>
-          Attended
-      </Text>
-          <Text style={styles.certificateText}>
-           {data.event} </Text>
-          <Text style={styles.certificateText}>at <Text style={styles.year}>Digital Summit'24</Text> from <Text style={styles.year}>December 19-21st, 2024</Text> at Miracle City</Text>
-          <Text style={styles.certificateText}>
-          Visakhapatnam(AP)
-          </Text>
-          <Text style={styles.footer}>
-          "Cloud","Cognitive","Blockchain","IoT","Machine Learning"
-          </Text>
-      </View>
-      
-      <View style={styles.imageContainer}>
-      <Image style={styles.image} src={certificateImage} />
-      </View>
-      </View>
-    </Page>
-  </Document>
-)
 
 export default function QRCodeReader({ setAuthenticated }) {
   const [scannedData, setScannedData] = useState(null);
@@ -122,13 +16,23 @@ export default function QRCodeReader({ setAuthenticated }) {
   const videoRef = useRef(null);
   const scannerRef = useRef(null);
   const [fetchingState, setFetchingState] = useState("idle");
+  const [showDetails,setShowDetails] = useState(false);
+  // const initialState = {
+  //   _id: "",
+  //   name: "revanth",
+  //   email: "revanth@gmail.com",
+  //   event: "Hnads on with revanth revanth revanth revanth revanth revanth revanth revanth revanth",
+  //   image: "",
+  //   issued : false
+  // }
+
   const initialState = {
     _id: "",
     name: "",
     email: "",
     event: "",
     image: "",
-    issued : ""
+    issued : false
   }
   const [details, setDetails] = useState(initialState);
 
@@ -148,54 +52,35 @@ export default function QRCodeReader({ setAuthenticated }) {
 
   const handleCancelMail = () => {
     setFetchingState("idle");
-    setDetails(initialState)
+    setShowDetails(false);
+    // setDetails(initialState)
   }
 
-  const generateAndSendPDF = async () => {
-    try {
-      setFetchingState("sending certificate");
-      // const pdfBlob = await pdf(<MyDocument data={details} />).toBlob(); 
-      // setPdfBlob(pdfBlob); // Set the generated PDF blob
-      await sendPDFToBackend(details); // Send PDF to backend
-    } catch (error) {
-      toast.error("Error while generating certificate")
-      console.log("Error generating PDF:", error);
-    }
-  };
 
   const handlefetchingDetails = async (userData) => {
     console.log(userData);
     try {
       setFetchingState("fetching details...");
       const result = await API.get.getDetails(userData);
-      // await generateAndSendPDF(result);
-      if(result.issued){
-        setFetchingState("idle");
-      }
-      else{
-        setFetchingState("fetched");
-      }
+      setShowDetails(true);
       setDetails(result);
     } catch (err) {
       console.log(err);
       toast.error("Error while feching details"+err);
-      setFetchingState("fetched");
+    }
+    finally{
+      setFetchingState("idle")
     }
   };
 
-  const sendPDFToBackend = async (data) => {
+  const sendPDFToBackend = async () => {
     try {
-      // if (pdfBlob instanceof Blob) {
-        console.log("Valid Blob:", data.email);
-        // const formData = new FormData();
-        // formData.append("name", data.name);
-        // formData.append("event", data.event);
-        // formData.append("email", data.email);
-        // formData.append("pdf", pdfBlob, "certificate.pdf");
-        const response = await API.post.sendCertificate(data);
-        setDetails(initialState)
+        console.log("Valid Blob:", details.email);
+        setFetchingState("sending mail")
+        await API.post.sendCertificate(details);
+        setShowDetails(false);
+        // setDetails(initialState)
         toast.success("Mail sent successfully");
-      // }
     } catch (err) {
       console.log(err);
       toast.error("Failed to send mail");
@@ -254,192 +139,111 @@ export default function QRCodeReader({ setAuthenticated }) {
   },[fetchingState])
 
   return (
-    <div className="min-h-screen bg-gray-100 flex items-start justify-center px-2">
-      {/* <header className="bg-white shadow-md py-4 2xl:px-8 p-2 flex justify-end">
-        <LogOut
-          onClick={handleLogout}
-          className="h-4 w-4 mr-2 cursor-pointer"
-        />
-      </header> */}
+    <div className="h-full flex items-start justify-center px-2">
       <ToastContainer />
-        <Card className="w-full max-w-md md:mt-0 mt-3 h-[670px] rounded-xl p-2 pb-12 relative">
-          <CardHeader className="text-white mt-7 rounded-t-xl p-2">
-            <div className="mb-3 flex justify-between items-center"><div className="invisible">efefe</div><img src={miracleLogo} width={150} alt="miracle" /> <div className="flex justify-center items-center bg-miracle-lightBlue text-white rounded-full w-8 h-8"><LogOut
-          onClick={handleLogout}
-          className="h-4 w-4 cursor-pointer"
-        /></div></div>
+        <Card className="w-full relative max-w-md rounded-xl h-full border-0 shadow-none overflow-hidden">
+          <CardHeader className="text-white mt-2 rounded-t-xl p-2">
+            <div className="flex justify-between">
+              
+              <div className={`${showDetails ? "visible" : "invisible"} flex justify-center items-center  text-black rounded-full w-8 h-8`}>
+                <ArrowLeft
+                  onClick={handleCancelMail}
+                  className="h-6 w-6 cursor-pointer"
+                />
+              </div>
+              <div className="flex justify-center items-center bg-miracle-lightBlue text-white rounded-full w-8 h-8">
+                <LogOut
+                  onClick={handleLogout}
+                  className="h-4 w-4 cursor-pointer"
+                />
+              </div>
+            </div>
+            
+            <div className="flex justify-center items-center"><img src={miracleLogo} width={150} alt="miracle" /></div>
+
             <CardTitle className="text-2xl font-bold text-center text-miracle-darkBlue">
               DS-2024 Scanner
             </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-4 md:px-4 p-2">
-            {
-              details.email === "" &&
-              <div className="relative aspect-video bg-black rounded-lg overflow-hidden h-[300px] w-full">
-              <video ref={videoRef} className="w-full h-full object-cover" />
-              {isScanning && <div className="absolute inset-0 flex items-center justify-center bg-miracle-lightBlue h-[2px] w-[93%] mx-auto animate-upDown"></div> }
-              {!isScanning && (
-                <div className="absolute inset-0 flex items-center justify-center bg-black">
-                  <Camera className="w-16 h-16 text-miracle-white opacity-50" />
-                </div>
+        <div className={`flex transition-transform duration-500 ease-in-out min-w-full ${showDetails ? "-translate-x-full" : "translate-x-0"}`}>
+          <CardContent className="space-y-4 p-0 min-w-full">
+                <div className="relative aspect-video bg-black rounded-lg overflow-hidden h-[400px] w-full">
+                <video ref={videoRef} className="w-full h-full object-cover" />
+                {isScanning && <div className="absolute inset-0 flex items-center justify-center bg-miracle-lightBlue h-[2px] w-[93%] mx-auto animate-upDown"></div> }
+                {!isScanning && (
+                  <div className="absolute inset-0 flex items-center justify-center bg-black">
+                    <Camera className="w-16 h-16 text-miracle-white opacity-50" />
+                  </div>
+                )}
+              </div>
+
+              {error && (
+                <Alert variant="destructive">
+                  <AlertCircle className="h-4 w-4" />
+                  <AlertTitle>Error</AlertTitle>
+                  <AlertDescription>{error}</AlertDescription>
+                </Alert>
               )}
-            </div>
-            }
 
-            {error && (
-              <Alert variant="destructive">
-                <AlertCircle className="h-4 w-4" />
-                <AlertTitle>Error</AlertTitle>
-                <AlertDescription>{error}</AlertDescription>
-              </Alert>
-            )}
+                <Button
+                  onClick={isScanning ? stopScanning : startScanning}
+                  className="w-full bg-[#0d416b] hover:bg-[#0d416b]/90"
+                  disabled={fetchingState !== "idle"}
+                >
+                  {isScanning
+                    ? "Stop Scanning"
+                    : fetchingState.includes("fetching")
+                    ? <span className="flex items-center"><Loader2 className="mr-1 h-4 w-4 animate-spin" /> Fetching Details...</span> 
+                    : <span className="flex items-center"> <ScanLine className="h-5 w-5 inline mr-2" /> <span>Scan QR Code</span> </span>}
+                </Button>
+          </CardContent>
 
+          <CardContent className="space-y-4 p-0 min-w-full">
 
-            {details.email !== "" && (
-              <div className="flex flex-col justify-between">
-                <div className="flex justify-center items-center">
-                  <img
-                    src={details.image}
-                    alt="Profile"
-                    className="w-32 h-32 object-cover rounded-full border-4 border-[#00aae7]"
-                  />
-                </div>
-                <div className="mt-2">
-                  {/* <table className="border-collaps">
-                    <tbody>
-                      <tr className=" border-gray-200">
-                        <td className="py-4 font-semibold text-gray-700">Name</td>
-                        <td className="py-4 text-gray-600">:</td>
-                        <td className="py-4 text-gray-600">{details.name}</td>
-                      </tr>
-                      <tr className=" border-gray-200">
-                        <td className="py-4 font-semibold text-gray-700">Email</td>
-                        <td className="py-4 text-gray-600">:</td>
-                        <td className="py-4 text-gray-600">
-                          {details.email.substring(0, details.email.lastIndexOf('@')).length > 13
-                            ? details.email.substring(0, 5) + '***' + details.email.substring(details.email.lastIndexOf('@') - 5)
-                            : details.email}
-                        </td>
-                      </tr>
-                      <tr>
-                        <td className="py-4 font-semibold text-gray-700 align-top">Event</td>
-                        <td className="py-4 text-gray-600 align-top">:</td>
-                        <td className="py-4 text-gray-600">{details.event}</td>
-                      </tr>
-                      {
-                        details.issued && <tr>
-                        <td className="py-4 font-semibold text-gray-700 align-top">Status</td>
-                        <td className="py-4 text-gray-600 align-top">:</td>
-                        <td className="py-4 text-gray-600"><span className="text-green-700 font-semibold">Certificate Issued</span></td>
-                      </tr>
-                      }
-                      
-                    </tbody>
-                  </table> */}
-                  <p className="text-center text-lg font-bold">{details.name.charAt(0).toLocaleUpperCase() + details.name.substring(1)}</p>
-                  <p className="text-center mt-1">{details.email.substring(0,details.email.lastIndexOf('@')).length > 13 ? details.email.substring(0,5) + "***" + details.email.substring(details.email.lastIndexOf('@') - 5) : details.email}</p>
-                  <p className="text-center mt-1 text-gray-400 font-bold">{details.event}</p>
-                  {details.issued && <p className="text-green-700 font-semibold text-center mt-1">Certificate Issued</p>}
+              {details.email !== "" && (
+                <div className="flex flex-col justify-center h-[400px]">
+                  <div className="flex justify-center items-center">
+                    <img
+                      src={details.image}
+                      alt="Profile"
+                      className="w-32 h-32 object-cover rounded-full border-4 border-[#00aae7]"
+                    />
+                  </div>
+                  <div className="mt-2">
+                    <p className="text-center text-lg font-bold">{details.name.charAt(0).toLocaleUpperCase() + details.name.substring(1)}</p>
+                    <p className="text-center mt-1">{details.email}</p>
+                    {/* <p className="text-center mt-1">{details.email.substring(0,details.email.lastIndexOf('@')).length > 13 ? details.email.substring(0,5) + "***" + details.email.substring(details.email.lastIndexOf('@') - 5) : details.email}</p> */}
+                    <p className="text-center mt-1 text-gray-400 font-bold">{details.event}</p>
+                    {details.issued && <p className="text-green-700 font-semibold text-center mt-1">Certificate Issued</p>}
+                    
+                  </div>
                   
                 </div>
-                
-              </div>
-            )}
-
-            {fetchingState.includes("idle") || fetchingState.includes("fetching") || fetchingState.includes("sending") ? (
-              <Button
-                onClick={isScanning ? stopScanning : startScanning}
-                className="w-full bg-[#0d416b] hover:bg-[#0d416b]/90"
-                disabled={fetchingState !== "idle"}
-              >
-                {isScanning
-                  ? "Stop Scanning"
-                  : fetchingState.includes("fetching")
-                  ? "Fetching Details..."
-                  : fetchingState.includes("generating")
-                  ? "Generating Pdf..."
-                  : fetchingState.includes("sending")
-                  ? "Sending Mail..."
-                  : <span> <ScanLine className="h-5 w-5 inline mr-2" /> Start Scanning</span>}
-              </Button>
-            ) : (
-              // <div className="flex justify-between">
-              //   <Button onClick={generateAndSendPDF} className="bg-miracle-mediumBlue">
-              //     <Mail />
-              //     Send Mail
-              //   </Button>
-              //   <Button variant="destructive" onClick={handleCancelMail} className="bg-miracle-red">
-              //     <X />
-              //     Cancel
-              //   </Button>
-              // </div>
-              <div className="flex space-x-2">
-              <Button 
-                onClick={generateAndSendPDF} 
-                className="flex-1 bg-[#2368a0] hover:bg-[#1c5280] text-white"
-                
-              >
-                 Send Mail
-                <Mail className="h-4 w-4" />
-              </Button>
-              <Button 
-                onClick={handleCancelMail} 
-                variant="outline" 
-                className="flex-1 bg-miracle-red text-white"
-              >
-                Cancel
-                <XCircle className=" h-4 w-4" />
-              </Button>
-            </div>
-            )}
-
-            {/* {scannedData && (
-            <PDFDownloadLink
-              document={<MyDocument data={scannedData} />}
-              fileName="scanned_qr_data.pdf"
-            >
-              {({ blob, url, loading, error }) => (
-                <Button 
-                  className="w-full bg-[#2368a0] hover:bg-[#1c5280] text-white"
-                  disabled={loading}
-                >
-                  {loading ? 'Generating PDF...' : 'Download PDF'}
-                  <FileDown className="ml-2 h-4 w-4" />
-                </Button>
               )}
-            </PDFDownloadLink>
-          )} */}
-
-            {/* {details.image !== '' && (
-            <PDFDownloadLink
-              document={<MyDocument data={details} />}
-              fileName="certificate.pdf"
-            >
-              {({ blob, url, loading, error }) => {
-                if (!loading && blob) {
-                  sendPDFToBackend(blob);
+                <div className="flex flex-col space-y-2">
+                {
+                  fetchingState.includes("sending") ? 
+                  <Button className="flex-1 bg-miracle-darkBlue hover:bg-miracle-darkBlue" disabled>
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                      sending...
+                  </Button>
+                  :
+                  <Button 
+                  onClick={sendPDFToBackend} 
+                  className="flex-1 bg-[#2368a0] hover:bg-[#1c5280] text-white"
+                  
+                >
+                  <Mail className="h-4 w-4" /> Send Mail
+                </Button>
+      
                 }
-              }}
-            </PDFDownloadLink>
-          )} */}
-
-            {/* {fetchingState.includes("fetching") ? (
-            <div className="text-blue-600 bg-blue-300 flex p-2 items-center justify-center rounded-md">
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Fetching
-              details...
-            </div>
-          ) : null}
-          {fetchingState.includes("sending") ? (
-            <div className="text-blue-600 bg-blue-300 flex p-2 items-center justify-center rounded-md">
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Sending Mail...
-            </div>
-          ) : null} */}
+              </div>
           </CardContent>
-          <CardFooter className="absolute bottom-0 p-2 w-full left-0">
-            <div className="w-full flex items-center justify-center">
-              Made with ❤️ at Miracle Labs
-            </div>
-            </CardFooter>
+        </div>
+
+          <div className="w-full flex items-center justify-center text-sm absolute bottom-0 text-gray-500">
+          Made with ❤️ at Miracle Labs
+        </div>
         </Card>
     </div>
   );

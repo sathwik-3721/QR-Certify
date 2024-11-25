@@ -366,7 +366,7 @@ const generatePdf = async (data) => {
 export const sendCertificate = async (req, res) => {
   try {
     const { name, email, event } = req.body;
-    console.log("email", req.body);
+    console.log("email", name,email,event);
     const certificateBytes = await generatePdf({ name, event });
     // const pdfBuffer = req.file.buffer; // Access the uploaded PDF file in memory
     // const fileName = req.file.originalname; // Get the original filename
@@ -446,6 +446,7 @@ export const sendCertificate = async (req, res) => {
         return res.status(StatusCodes.OK).send("Send mail successfully");
       }
     });
+    // return res.status(200).send("mail sent")
   } catch (error) {
     console.error("An error occurred in uploadData function:", error);
     if (error.status) {
