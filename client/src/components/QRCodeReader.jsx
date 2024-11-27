@@ -120,9 +120,7 @@ export default function QRCodeReader({ setAuthenticated }) {
 
       await scannerRef.current.start();
     } catch (err) {
-      setError(
-        "Failed to start camera. Please ensure you have given camera permissions."
-      );
+      toast.error("Can't find Camera");
       setIsScanning(false);
     }
   };
@@ -176,14 +174,14 @@ export default function QRCodeReader({ setAuthenticated }) {
                   </div>
                 )}
               </div>
-
+{/* 
               {error && (
                 <Alert variant="destructive">
                   <AlertCircle className="h-4 w-4" />
                   <AlertTitle>Error</AlertTitle>
                   <AlertDescription>{error}</AlertDescription>
                 </Alert>
-              )}
+              )} */}
 
                 <Button
                   onClick={isScanning ? stopScanning : startScanning}
@@ -220,17 +218,18 @@ export default function QRCodeReader({ setAuthenticated }) {
                   
                 </div>
               )}
-                <div className="flex flex-col space-y-2">
+                { !details.issued &&
+                  <div className="px-2">
                 {
                   fetchingState.includes("sending") ? 
-                  <Button className="flex-1 bg-miracle-darkBlue hover:bg-miracle-darkBlue" disabled>
+                  <Button className="bg-miracle-darkBlue hover:bg-miracle-darkBlue" disabled>
                       <Loader2 className="h-4 w-4 animate-spin" />
                       sending...
                   </Button>
                   :
                   <Button 
                   onClick={sendPDFToBackend} 
-                  className="flex-1 bg-[#2368a0] hover:bg-[#1c5280] text-white"
+                  className="bg-[#2368a0] hover:bg-[#1c5280] text-white w-full"
                   
                 >
                   <Mail className="h-4 w-4" /> Send Mail
@@ -238,6 +237,7 @@ export default function QRCodeReader({ setAuthenticated }) {
       
                 }
               </div>
+              }
           </CardContent>
         </div>
 
