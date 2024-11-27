@@ -222,7 +222,7 @@ export default function QRCodeReader({ setAuthenticated }) {
                   <div className="px-2">
                 {
                   fetchingState.includes("sending") ? 
-                  <Button className="bg-miracle-darkBlue hover:bg-miracle-darkBlue" disabled>
+                  <Button className="bg-miracle-darkBlue hover:bg-miracle-darkBlue w-full" disabled>
                       <Loader2 className="h-4 w-4 animate-spin" />
                       sending...
                   </Button>

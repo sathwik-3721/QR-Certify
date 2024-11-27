@@ -133,7 +133,7 @@ export default function QrGenerate() {
           <div className="text-center mb-5 flex justify-center"><img src={miracleLogo} width={150} alt="miracle" /></div>
           
           <CardTitle className="text-2xl font-bold text-center text-miracle-darkBlue">
-            {qrCodeData ? "Save Generated QR Code" : "DS-2024 Certificate Registration" }
+            DS-2024 Certificate Registration
           </CardTitle>
         </CardHeader>
         <div className={`flex transition-transform duration-500 ease-in-out min-w-full ${showQr ? "-translate-x-full" : "translate-x-0"}`}>
@@ -169,7 +169,7 @@ export default function QrGenerate() {
               </div>
               <div className="space-y-2">
                 <Label htmlFor="demo" className="text-gray-700">
-                  Event
+                  Hands-On
                 </Label>
                 <Select
                   value={formData.event}
@@ -179,7 +179,7 @@ export default function QrGenerate() {
                     id="event"
                     className="border-gray-300 focus:border-[#00aae7] focus:ring-[#00aae7]"
                   >
-                    <SelectValue placeholder="Select a event" />
+                    <SelectValue placeholder="Select a Hands-On Session" />
                   </SelectTrigger>
                   <SelectContent>
                     {
@@ -192,7 +192,7 @@ export default function QrGenerate() {
               <div className="space-y-2">
                 
                 <Label htmlFor="image" className="text-gray-700">
-                  Image
+                  Picture
                 </Label>
                 {formData.image !== "" && (
                   <div className="mt-2 flex justify-center">
@@ -217,7 +217,7 @@ export default function QrGenerate() {
                   onClick={() => fileInputRef.current?.click()}
                   className="w-full bg-[#ffffff] border border-gray-300 hover:bg-slate-100 text-black"
                 >
-                  <Upload className="h-5 w-5" />Upload Image
+                  <Upload className="h-5 w-5" />Upload Picture
                 </Button>
                 {errors.image && <p className="text-miracle-red text-sm">{errors.image}</p>}
    
@@ -226,7 +226,7 @@ export default function QrGenerate() {
                 isLoading
                 ? <Button className="w-full bg-miracle-darkBlue hover:bg-miracle-darkBlue" disabled>
                     <Loader2 className="mr-1 h-4 w-4 animate-spin" />
-                    generating...
+                    Generating...
                   </Button>
                 : <Button
                     type="submit"
@@ -240,7 +240,7 @@ export default function QrGenerate() {
         </CardContent>
         <CardContent className="md:px-4 p-2 min-w-full">
           {qrCodeData && (
-            <div className="w-full h-[400px] flex justify-center items-center">
+            <div className="w-full h-[400px] flex flex-col justify-center items-center">
               <QRCodeSVG
                 value={qrCodeData}
                 size={200}
@@ -249,10 +249,11 @@ export default function QrGenerate() {
                 bgColor="#ffffff"
                 fgColor="#232527"
               />
+              <p className="text-center p-1 mt-2 text-miracle-darkGrey font-semibold text-sm">Please Save this QR code and get it scanned by the event coordinator to recieve the participation certificate.</p>
             </div>
           )}
-          <div onClick={() => setShowQr(false)} className="flex justify-center text-white bg-miracle-darkBlue w-[180px] py-1 px-2 rounded-lg mx-auto">
-            <ArrowLeft className="mr-1" /> Back
+          <div onClick={() => setShowQr(false)} className="flex justify-center items-center text-white bg-miracle-darkBlue w-[180px] py-1 px-2 rounded-lg mx-auto">
+            <ArrowLeft className="mr-1 h-5 w-5" /> Back
           </div>
         </CardContent>
         </div>

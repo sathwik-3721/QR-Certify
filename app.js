@@ -5,13 +5,15 @@ import { join } from "path";
 import { fileURLToPath } from "url";
 import { dirname } from "path";
 import cors from "cors";
+import dotenv from "dotenv";
+dotenv.config();
 //file imports
-import config from "./config.js";
+// import config from "./config.js";
 import logger from "./logger.js";
 import appv1 from "./server/src/app/v1/app.v1.js";
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const app = express();
-const environmant = config.ENV;
+// const environmant = config.ENV;
 //port setup - app start declaration
 const port = process.env.PORT || 8000;
 const requestLoggerMiddleware = (req, res, next) => {
@@ -54,7 +56,7 @@ app.use(cookieParser());
 app.use("/v1", appv1);
 app.use(static_(join(__dirname, "public")));
 
-logger.info("Application Environment : " + environmant);
+// logger.info("Application Environment : " + environmant);
 app.listen(port, () => {
   console.log("Server started on port: " + port);
 });

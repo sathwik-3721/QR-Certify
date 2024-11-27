@@ -198,6 +198,9 @@
 // export async function test(req,res) {
 //     res.status(StatusCodes.OK).send("test successfully")
 // }
+
+import dotenv from "dotenv";
+dotenv.config();
 import Qr from "../models/qr.model.js";
 import { StatusCodes } from "http-status-codes";
 import nodemailer from "nodemailer";
@@ -311,9 +314,14 @@ const generatePdf = async (data) => {
     { text: "from ", font: robotoFont, size: 18 },
     { text: "December 19-21st, 2024", font: robotoBoldFont, size: 18 }, // Bold text
     { text: " at Miracle City", font: robotoFont, size: 18 },
-    { text: "Visakhapatnam (AP)", font: robotoFont, size: 18 },
+    { text: "Vizianagaram (AP)", font: robotoFont, size: 18 },
     {
-      text: '"Cloud", "Cognitive", "Blockchain", "IoT", "Machine Learning"',
+      text: '"Generative AI", "Data and Analytics", "Cloud and Digital Applications", "Cybersecurity", ',
+      font: robotoFont,
+      size: 18,
+    },
+    {
+      text: '"Automation", "IOT"',
       font: robotoFont,
       size: 18,
     },
@@ -345,7 +353,7 @@ const generatePdf = async (data) => {
       y: yPosition,
       size: segment.size,
       font: segment.font,
-      color: i === 8 ? rgb(0.5, 0.5, 0.5) : rgb(0, 0, 0),
+      color: i >= 8 ? rgb(0.5, 0.5, 0.5) : rgb(0, 0, 0),
     });
 
     // Move xPosition to the right for the next segment
@@ -363,6 +371,7 @@ const generatePdf = async (data) => {
   return pdfBytes;
 };
 
+
 export const sendCertificate = async (req, res) => {
   try {
     const { name, email, event } = req.body;
@@ -377,8 +386,14 @@ export const sendCertificate = async (req, res) => {
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Thank You Email</title>
+      <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+    <style>
+        *{
+            font-family: 'Montserrat',sans-serif;
+        }
+    </style>
 </head>
-<body style="font-family: Arial, sans-serif; background-color: #f4f4f4; padding: 20px; margin: 0;">
+<body style="font-family: 'Montserrat', sans-serif; background-color: #f4f4f4; padding: 20px; margin: 0;">
   <table width="100%" border="0" cellspacing="0" cellpadding="0" style="max-width: 600px; margin: auto; background-color: #ffffff; border: 1px solid #dddddd; border-radius: 8px;">
     <!-- Header -->
     <tr>
