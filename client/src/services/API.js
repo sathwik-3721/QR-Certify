@@ -1,12 +1,12 @@
 import axios from "axios";
 // const URL = import.meta.env.VITE_URL;
-const URL = "http://localhost:8000/v1/api"
+const URL = window.origin;
 console.log(URL)
 export default {
   post: {
     register: async (data) => {
       try{
-        const response = await axios.post(`${URL}/uploadData`, data);
+        const response = await axios.post(`${URL}/v1/api/uploadData`, data);
         return response.data;
       }
       catch(err){
@@ -15,7 +15,7 @@ export default {
     },
     sendCertificate : async (data) => {
       try{
-        const response = await axios.post(`${URL}/sendCerificate`, data);
+        const response = await axios.post(`${URL}/v1/api/sendCertificate`, data);
         return response.data;
       }
       catch(err){
@@ -26,7 +26,8 @@ export default {
   get : {
     getDetails : async (userData) => {
       try{
-        const response = await axios.get(`${URL}/getDetails?name=${userData.name}&email=${userData.email}&event=${userData.event}`);
+        // const response = await axios.get(`${URL}/getDetails?name=Revanth&email=revathipathilanka347@gmail.com&event=Demos`);
+        const response = await axios.get(`${URL}/v1/api/getDetails?name=${userData.name}&email=${userData.email}&event=${userData.event}`);
         return response.data;
       }
       catch(err){

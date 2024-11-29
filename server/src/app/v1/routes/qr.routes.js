@@ -13,6 +13,7 @@ router.route('/sendCertificate')
 router.route('/getDetails')
 	.get(getDetails)
 
+
 router.route("/test")
 	.get(test)
 

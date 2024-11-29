@@ -1,9 +1,11 @@
 import logger from "../../../../../logger.js";
-import config from "../../../../../config.js";
+// import config from "../../../../../config.js";
 import mongoose from 'mongoose';
+import dotenv from "dotenv";
+dotenv.config();
 
 const DbConfig = {
-    uri: config.MONGO_URI,
+    uri: process.env.MONGO_URI,
 };
 
 const connectDB = (async () => {

@@ -1,110 +1,99 @@
-import { useState, useEffect, useRef } from 'react'
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
-import { Camera, AlertCircle, FileDown } from "lucide-react"
-import QrScanner from 'qr-scanner'
-import { Document, Page, Text, View,Image, StyleSheet, PDFDownloadLink } from '@react-pdf/renderer'
-import API from '@/services/API'
+import { useState, useEffect, useRef } from "react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Camera, AlertCircle, LogOut, Mail,Loader2, ArrowLeft,ScanLine } from "lucide-react";
+import miracleLogo from '../assets/miracle.png'
 
-// Define styles for PDF
-const styles = StyleSheet.create({
-  page: {
-    flexDirection: 'column',
-    backgroundColor: '#E4E4E4',
-    padding: 30,
-  },
-  section: {
-    margin: 10,
-    padding: 10,
-    flexGrow: 1,
-  },
-  title: {
-    fontSize: 24,
-    marginBottom: 10,
-  },
-  content: {
-    fontSize: 12,
-    marginBottom: 5,
-  },
-  image: {
-    width: 200, 
-    height: 200
+import QrScanner from "qr-scanner";
+import API from "@/services/API";
+import { ToastContainer, toast } from "react-toastify";
+
+export default function QRCodeReader({ setAuthenticated }) {
+  const [scannedData, setScannedData] = useState(null);
+  const [error, setError] = useState(null);
+  const [isScanning, setIsScanning] = useState(false);
+  const videoRef = useRef(null);
+  const scannerRef = useRef(null);
+  const [fetchingState, setFetchingState] = useState("idle");
+  const [showDetails,setShowDetails] = useState(false);
+  // const initialState = {
+  //   _id: "",
+  //   name: "revanth",
+  //   email: "revanth@gmail.com",
+  //   event: "Hnads on with revanth revanth revanth revanth revanth revanth revanth revanth revanth",
+  //   image: "",
+  //   issued : false
+  // }
+
+  const initialState = {
+    _id: "",
+    name: "",
+    email: "",
+    event: "",
+    image: "",
+    issued : false
   }
-});
-
-// PDF Document component
-const MyDocument = ({ data }) => (
-  <Document>
-    <Page size="A4" style={styles.page}>
-      <View style={styles.section}>
-        <Text style={styles.title}>Scanned QR Code Data</Text>
-        <Text style={styles.content}>Name: {data.name}</Text>
-        <Text style={styles.content}>Email: {data.email}</Text>
-        <Text style={styles.content}>Demo: {data.event}</Text>
-        <View style={styles.section}>
-        {data.image ? (
-          <Image style={styles.image} src={data.image} />
-        ) : (
-          <Text>No image available</Text>
-        )}
-      </View>
-      </View>
-    </Page>
-  </Document>
-);
-
-export default function QRCodeReader() {
-  const [scannedData, setScannedData] = useState(null)
-  const [error, setError] = useState(null)
-  const [isScanning, setIsScanning] = useState(false)
-  const videoRef = useRef(null)
-  const scannerRef = useRef(null)
-  const [details,setDetails] = useState({
-    "_id":"",
-    name: '',
-    email: '',
-    event: '',
-    image: ''
-  });
+  const [details, setDetails] = useState(initialState);
 
   useEffect(() => {
     return () => {
       if (scannerRef.current) {
-        scannerRef.current.destroy()
+        scannerRef.current.destroy();
       }
-    }
-  }, [])
+    };
+  }, []);
 
-  const handlePdfGeneration = async (userData) => {
-    const result = await API.get.getDetails(userData);
-    console.log(result)
-    setDetails(result);
+  const handleLogout = () => {
+    localStorage.removeItem("userData");
+    setAuthenticated(false);
+    console.log("logged out")
+  };
+
+  const handleCancelMail = () => {
+    setFetchingState("idle");
+    setShowDetails(false);
+    // setDetails(initialState)
   }
 
-  const sendPDFToBackend = async (pdfBlob) => {
-    console.log(pdfBlob)
-    // const formData = new FormData();
-    // formData.append('pdf', pdfBlob, 'certificate.pdf');
-  
-    // // const response = await fetch('/api/send-pdf', {
-    // //   method: 'POST',
-    // //   body: formData,
-    // // });
 
-    // const response = await API.post.sendCertificate(formData);
-  
-    // if (response.ok) {
-    //   console.log('PDF sent to backend successfully!');
-    // } else {
-    //   console.error('Error sending PDF to backend');
-    // }
+  const handlefetchingDetails = async (userData) => {
+    console.log(userData);
+    try {
+      setFetchingState("fetching details...");
+      const result = await API.get.getDetails(userData);
+      setShowDetails(true);
+      setDetails(result);
+    } catch (err) {
+      console.log(err);
+      toast.error("Error while feching details"+err);
+    }
+    finally{
+      setFetchingState("idle")
+    }
+  };
+
+  const sendPDFToBackend = async () => {
+    try {
+        console.log("Valid Blob:", details.email);
+        setFetchingState("sending mail")
+        await API.post.sendCertificate(details);
+        setShowDetails(false);
+        // setDetails(initialState)
+        toast.success("Mail sent successfully");
+    } catch (err) {
+      console.log(err);
+      toast.error("Failed to send mail");
+    } finally {
+      setFetchingState("idle");
+    }
   };
 
   const startScanning = async () => {
-    setError(null)
-    setScannedData(null)
-    setIsScanning(true)
+    setError(null);
+    setScannedData(null);
+    setIsScanning(true);
+    setDetails(initialState);
 
     try {
       if (!videoRef.current) return;
@@ -114,113 +103,148 @@ export default function QRCodeReader() {
         (result) => {
           try {
             const parsedData = JSON.parse(result.data);
-            handlePdfGeneration(parsedData)
-            setScannedData(parsedData)
+            handlefetchingDetails(parsedData);
+            setScannedData(parsedData);
           } catch (err) {
-            setError('Invalid QR code data format')
+            setError("Invalid QR code data format");
           }
-          setIsScanning(false)
-          scannerRef.current?.stop()
+          setIsScanning(false);
+          scannerRef.current?.stop();
         },
         {
           returnDetailedScanResult: true,
-          highlightScanRegion: true,
-          highlightCodeOutline: true,
+          highlightScanRegion: false,
+          highlightCodeOutline: false,
         }
-      )
+      );
 
-      await scannerRef.current.start()
+      await scannerRef.current.start();
     } catch (err) {
-      setError('Failed to start camera. Please ensure you have given camera permissions.')
-      setIsScanning(false)
+      toast.error("Can't find Camera");
+      setIsScanning(false);
     }
-  }
+  };
 
   const stopScanning = () => {
     if (scannerRef.current) {
-      scannerRef.current.stop()
+      scannerRef.current.destroy();
     }
-    setIsScanning(false)
-  }
+    setIsScanning(false);
+  };
+
+  useEffect(() =>{
+    console.log(fetchingState)
+  },[fetchingState])
 
   return (
-    <div className="min-h-screen bg-gray-100 flex items-center justify-center p-4">
-      <Card className="w-full max-w-md shadow-lg">
-        <CardHeader className="bg-[#00aae7] text-white">
-          <CardTitle className="text-2xl font-bold text-center">QR Code Reader</CardTitle>
-        </CardHeader>
-        <CardContent className="mt-6 space-y-4">
-          <div className="relative aspect-video bg-black rounded-lg overflow-hidden">
-            <video ref={videoRef} className="w-full h-full object-cover" />
-            {!isScanning && (
-              <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50">
-                <Camera className="w-16 h-16 text-white opacity-50" />
+    <div className="h-full flex items-start justify-center px-2">
+      <ToastContainer />
+        <Card className="w-full relative max-w-md rounded-xl h-full border-0 shadow-none overflow-hidden">
+          <CardHeader className="text-white mt-2 rounded-t-xl p-2">
+            <div className="flex justify-between">
+              
+              <div className={`${showDetails ? "visible" : "invisible"} flex justify-center items-center  text-black rounded-full w-8 h-8`}>
+                <ArrowLeft
+                  onClick={handleCancelMail}
+                  className="h-6 w-6 cursor-pointer"
+                />
               </div>
-            )}
-          </div>
-          
-          {error && (
-            <Alert variant="destructive">
-              <AlertCircle className="h-4 w-4" />
-              <AlertTitle>Error</AlertTitle>
-              <AlertDescription>{error}</AlertDescription>
-            </Alert>
-          )}
+              <div className="flex justify-center items-center bg-miracle-lightBlue text-white rounded-full w-8 h-8">
+                <LogOut
+                  onClick={handleLogout}
+                  className="h-4 w-4 cursor-pointer"
+                />
+              </div>
+            </div>
+            
+            <div className="flex justify-center items-center"><img src={miracleLogo} width={150} alt="miracle" /></div>
 
-          {scannedData && (
-            <Alert>
-              <AlertTitle>Scanned Data</AlertTitle>
-              <AlertDescription>
-                <p>Name: {scannedData.name}</p>
-                <p>Email: {scannedData.email}</p>
-                <p>Demo: {scannedData.event}</p>
-              </AlertDescription>
-            </Alert>
-          )}
+            <CardTitle className="text-2xl font-bold text-center text-miracle-darkBlue">
+              DS-2024 Scanner
+            </CardTitle>
+          </CardHeader>
+        <div className={`flex transition-transform duration-500 ease-in-out min-w-full ${showDetails ? "-translate-x-full" : "translate-x-0"}`}>
+          <CardContent className="space-y-4 p-0 min-w-full">
+                <div className="relative aspect-video bg-black rounded-lg overflow-hidden h-[400px] w-full">
+                <video ref={videoRef} className="w-full h-full object-cover" />
+                {isScanning && <div className="absolute inset-0 flex items-center justify-center bg-miracle-lightBlue h-[2px] w-[93%] mx-auto animate-upDown"></div> }
+                {!isScanning && (
+                  <div className="absolute inset-0 flex items-center justify-center bg-black">
+                    <Camera className="w-16 h-16 text-miracle-white opacity-50" />
+                  </div>
+                )}
+              </div>
+{/* 
+              {error && (
+                <Alert variant="destructive">
+                  <AlertCircle className="h-4 w-4" />
+                  <AlertTitle>Error</AlertTitle>
+                  <AlertDescription>{error}</AlertDescription>
+                </Alert>
+              )} */}
 
-          <Button 
-            onClick={isScanning ? stopScanning : startScanning} 
-            className="w-full bg-[#00aae7] hover:bg-[#0088b9] text-white"
-          >
-            {isScanning ? 'Stop Scanning' : 'Start Scanning'}
-          </Button>
-
-          {/* {scannedData && (
-            <PDFDownloadLink
-              document={<MyDocument data={scannedData} />}
-              fileName="scanned_qr_data.pdf"
-            >
-              {({ blob, url, loading, error }) => (
-                <Button 
-                  className="w-full bg-[#2368a0] hover:bg-[#1c5280] text-white"
-                  disabled={loading}
+                <Button
+                  onClick={isScanning ? stopScanning : startScanning}
+                  className="w-full bg-[#0d416b] hover:bg-[#0d416b]/90"
+                  disabled={fetchingState !== "idle"}
                 >
-                  {loading ? 'Generating PDF...' : 'Download PDF'}
-                  <FileDown className="ml-2 h-4 w-4" />
+                  {isScanning
+                    ? "Stop Scanning"
+                    : fetchingState.includes("fetching")
+                    ? <span className="flex items-center"><Loader2 className="mr-1 h-4 w-4 animate-spin" /> Fetching Details...</span> 
+                    : <span className="flex items-center"> <ScanLine className="h-5 w-5 inline mr-2" /> <span>Scan QR Code</span> </span>}
                 </Button>
-              )}
-            </PDFDownloadLink>
-          )} */}
+          </CardContent>
 
+          <CardContent className="space-y-4 p-0 min-w-full">
 
-          {scannedData && (
-            <PDFDownloadLink
-              document={<MyDocument data={details} />}
-              fileName="certificate.pdf"
-            >
-              {({ blob, url, loading, error }) => {
-                if (!loading) {
+              {details.email !== "" && (
+                <div className="flex flex-col justify-center h-[400px]">
+                  <div className="flex justify-center items-center">
+                    <img
+                      src={details.image}
+                      alt="Profile"
+                      className="w-32 h-32 object-cover rounded-full border-4 border-[#00aae7]"
+                    />
+                  </div>
+                  <div className="mt-2">
+                    <p className="text-center text-lg font-bold">{details.name.charAt(0).toLocaleUpperCase() + details.name.substring(1)}</p>
+                    <p className="text-center mt-1">{details.email}</p>
+                    {/* <p className="text-center mt-1">{details.email.substring(0,details.email.lastIndexOf('@')).length > 13 ? details.email.substring(0,5) + "***" + details.email.substring(details.email.lastIndexOf('@') - 5) : details.email}</p> */}
+                    <p className="text-center mt-1 text-gray-400 font-bold">{details.event}</p>
+                    {details.issued && <p className="text-green-700 font-semibold text-center mt-1">Certificate Issued</p>}
+                    
+                  </div>
                   
-                  sendPDFToBackend(blob);
+                </div>
+              )}
+                { !details.issued &&
+                  <div className="px-2">
+                {
+                  fetchingState.includes("sending") ? 
+                  <Button className="bg-miracle-darkBlue hover:bg-miracle-darkBlue w-full" disabled>
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                      sending...
+                  </Button>
+                  :
+                  <Button 
+                  onClick={sendPDFToBackend} 
+                  className="bg-[#2368a0] hover:bg-[#1c5280] text-white w-full"
+                  
+                >
+                  <Mail className="h-4 w-4" /> Send Mail
+                </Button>
+      
                 }
-                // return <></>
-              }}
-            </PDFDownloadLink>
-          )}
+              </div>
+              }
+          </CardContent>
+        </div>
 
-        </CardContent>
-        {/* <Button onClick={handlePdfGeneration}>Generate Pdf</Button> */}
-      </Card>
+          <div className="w-full flex items-center justify-center text-sm absolute bottom-0 text-gray-500">
+          Made with ❤️ at Miracle Labs
+        </div>
+        </Card>
     </div>
-  )
+  );
 }
