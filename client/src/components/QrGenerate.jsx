@@ -133,11 +133,11 @@ export default function QrGenerate() {
           <div className="text-center mb-5 flex justify-center"><img src={miracleLogo} width={150} alt="miracle" /></div>
           
           <CardTitle className="text-2xl font-bold text-center text-miracle-darkBlue">
-            DS-2024 Certificate Registration
+            Digital Summit 2024 Certificate Registration
           </CardTitle>
         </CardHeader>
         <div className={`flex transition-transform duration-500 ease-in-out min-w-full ${showQr ? "-translate-x-full" : "translate-x-0"}`}>
-        <CardContent className={`md:px-4 p-2 min-w-full`}>
+        <CardContent className={`md:px-4 p-2 min-w-full mt-5`}>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-2">
                 <Label htmlFor="name" className="text-gray-700">
@@ -189,39 +189,7 @@ export default function QrGenerate() {
                 </Select>
                 {errors.event && <p className="text-miracle-red text-sm">{errors.event}</p>}
               </div>
-              <div className="space-y-2">
-                
-                <Label htmlFor="image" className="text-gray-700">
-                  Picture
-                </Label>
-                {formData.image !== "" && (
-                  <div className="mt-2 flex justify-center">
-                    <img
-                      src={formData.image}
-                      alt="Profile"
-                      className="w-24 h-24 object-cover rounded-full border-4 border-[#00aae7]"
-                    />
-                  </div>
-                )}
-                <Input
-                  id="image"
-                  name="image"
-                  type="file"
-                  accept="image/*"
-                  onChange={handleFileChange}
-                  ref={fileInputRef}
-                  className="hidden"
-                />
-                <Button
-                  type="button"
-                  onClick={() => fileInputRef.current?.click()}
-                  className="w-full bg-[#ffffff] border border-gray-300 hover:bg-slate-100 text-black"
-                >
-                  <Upload className="h-5 w-5" />Upload Picture
-                </Button>
-                {errors.image && <p className="text-miracle-red text-sm">{errors.image}</p>}
-   
-              </div>
+
               {
                 isLoading
                 ? <Button className="w-full bg-miracle-darkBlue hover:bg-miracle-darkBlue" disabled>

@@ -1,9 +1,9 @@
 import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Camera, AlertCircle, LogOut, Mail,Loader2, ArrowLeft,ScanLine } from "lucide-react";
 import miracleLogo from '../assets/miracle.png'
+import userLogo from '../assets/user.png'
 
 import QrScanner from "qr-scanner";
 import API from "@/services/API";
@@ -160,7 +160,7 @@ export default function QRCodeReader({ setAuthenticated }) {
             <div className="flex justify-center items-center"><img src={miracleLogo} width={150} alt="miracle" /></div>
 
             <CardTitle className="text-2xl font-bold text-center text-miracle-darkBlue">
-              DS-2024 Scanner
+              Scanner
             </CardTitle>
           </CardHeader>
         <div className={`flex transition-transform duration-500 ease-in-out min-w-full ${showDetails ? "-translate-x-full" : "translate-x-0"}`}>
@@ -202,7 +202,7 @@ export default function QRCodeReader({ setAuthenticated }) {
                 <div className="flex flex-col justify-center h-[400px]">
                   <div className="flex justify-center items-center">
                     <img
-                      src={details.image}
+                      src={userLogo}
                       alt="Profile"
                       className="w-32 h-32 object-cover rounded-full border-4 border-[#00aae7]"
                     />
@@ -211,8 +211,8 @@ export default function QRCodeReader({ setAuthenticated }) {
                     <p className="text-center text-lg font-bold">{details.name.charAt(0).toLocaleUpperCase() + details.name.substring(1)}</p>
                     <p className="text-center mt-1">{details.email}</p>
                     {/* <p className="text-center mt-1">{details.email.substring(0,details.email.lastIndexOf('@')).length > 13 ? details.email.substring(0,5) + "***" + details.email.substring(details.email.lastIndexOf('@') - 5) : details.email}</p> */}
-                    <p className="text-center mt-1 text-gray-400 font-bold">{details.event}</p>
-                    {details.issued && <p className="text-green-700 font-semibold text-center mt-1">Certificate Issued</p>}
+                    <p className="text-center mt-2 text-gray-400 font-bold">{details.event}</p>
+                    {details.issued && <p className="text-green-700 font-semibold text-center mt-2">Certificate Issued</p>}
                     
                   </div>
                   
@@ -241,7 +241,7 @@ export default function QRCodeReader({ setAuthenticated }) {
           </CardContent>
         </div>
 
-          <div className="w-full flex items-center justify-center text-sm absolute bottom-0 text-gray-500">
+          <div className="absolute bottom-0 w-full flex items-center justify-center text-sm text-gray-500">
           Made with ❤️ at Miracle Labs
         </div>
         </Card>
