@@ -1,7 +1,7 @@
 import axios from "axios";
 const URL = import.meta.env.VITE_URL;
+const QR_URL=import.meta.env.VITE_QR_URL;
 // const URL = window.origin;
-console.log(URL)
 export default {
   post: {
     register: async (data) => {
@@ -33,6 +33,16 @@ export default {
       catch(err){
         throw err;
       } 
+    },
+    getUserDetails : async (qrId) => {
+      try {
+        alert("response")
+        const response = await axios.get(`${QR_URL}/${qrId}`);
+        
+        return response.data.data[0];
+      } catch (err) {
+        throw err;
+      }
     }
   }
 

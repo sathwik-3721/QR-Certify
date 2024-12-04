@@ -23,6 +23,7 @@ import { ToastContainer, toast } from "react-toastify";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import miracleLogo from '../assets/miracle.png'
+import UserQrCodeReader from "./UserQrCodeReader";
 
 const registerSchema = z.object({
   name: z.string().min(1, "Name is required"),   
@@ -52,6 +53,7 @@ export default function QrGenerate() {
     "Deploying Applications Using Jenkins CICD Pipelines",
     "Building a MERN Stack Web App: From CRUD APIs to React Integration"
   ];
+  const [userData,setUserData] = useState(null)
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -64,21 +66,25 @@ export default function QrGenerate() {
     setFormData((prev) => ({ ...prev, event: value }));
   };
 
+  const handleUserData = (scannedData) => {
+    alert(scannedData.name)
+    setFormData((prev) => ({ ...prev, name: scannedData.name,email : scannedData.email }))
+  }
 
-  const handleFileChange = (e) => {
-    const file = e.target.files?.[0];
-    console.log(file.type)
-    if (file && file.type.includes("image")) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setFormData((prev) => ({ ...prev, image: reader.result }));
-      };
-      reader.readAsDataURL(file);
-    }
-    else{
-      toast.error("Select Image only")
-    }
-  };
+  // const handleFileChange = (e) => {
+  //   const file = e.target.files?.[0];
+  //   console.log(file.type)
+  //   if (file && file.type.includes("image")) {
+  //     const reader = new FileReader();
+  //     reader.onloadend = () => {
+  //       setFormData((prev) => ({ ...prev, image: reader.result }));
+  //     };
+  //     reader.readAsDataURL(file);
+  //   }
+  //   else{
+  //     toast.error("Select Image only")
+  //   }
+  // };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -126,7 +132,9 @@ export default function QrGenerate() {
   };
 
   return (
-    <div className="h-full flex md:items-center md:justify-center">
+    formData.name === ""
+    ? <UserQrCodeReader handleUserData={handleUserData} />
+    : <div className="h-full flex md:items-center md:justify-center">
       <ToastContainer />
       <Card className={`w-full relative max-w-md rounded-xl h-full border-0 shadow-none overflow-hidden`}>
         <CardHeader className="text-white rounded-t-xl mt-3 p-2 md:mt-0">
@@ -146,9 +154,8 @@ export default function QrGenerate() {
                 <Input
                   id="name"
                   name="name"
-                  value={formData.name}
-                  onChange={handleInputChange}
-                  
+                  value={userData ? userData.name : ""}
+                  disabled
                   className="border-gray-300 focus:border-[#00aae7] focus:ring-[#00aae7]"
                 />
                 {errors.name && <p className="text-miracle-red text-sm">{errors.name}</p>}
@@ -161,8 +168,8 @@ export default function QrGenerate() {
                   id="email"
                   name="email"
                   type="email"
-                  value={formData.email}
-                  onChange={handleInputChange}
+                  value={userData ? userData.name : ""}
+                  disabled
                   className="border-gray-300 focus:border-[#00aae7] focus:ring-[#00aae7]"
                 />
                 {errors.email && <p className="text-miracle-red text-sm">{errors.email}</p>}

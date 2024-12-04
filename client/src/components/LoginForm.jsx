@@ -22,7 +22,7 @@ const loginSchema = z.object({
 export default function LoginForm({ setAuthenticated }) {
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-  const navigate = useNavigate();
+    const navigate = useNavigate();
 
   const {
     register,
