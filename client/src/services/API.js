@@ -36,7 +36,6 @@ export default {
     },
     getUserDetails : async (qrId) => {
       try {
-        alert("response")
         const response = await axios.get(`${QR_URL}/${qrId}`);
         
         return response.data.data[0];

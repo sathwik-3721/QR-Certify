@@ -66,9 +66,8 @@ export default function QrGenerate() {
     setFormData((prev) => ({ ...prev, event: value }));
   };
 
-  const handleUserData = (scannedData) => {
-    alert(scannedData.name)
-    setFormData((prev) => ({ ...prev, name: scannedData.name,email : scannedData.email }))
+  const handleUserData = (data) => {
+    setFormData((prev) => ({ ...prev, name: data.FirstName+" "+data.LastName,email : data.Email }))
   }
 
   // const handleFileChange = (e) => {
@@ -102,12 +101,6 @@ export default function QrGenerate() {
       let { image, ...rest } = formData;
       const dataString = JSON.stringify(rest);
       setQRCodeData(dataString);
-      setFormData({
-        name: "",
-        event: "",
-        email: "",
-        image: "",
-      })
       setShowQr(true);
     } catch (err) {
       if(err instanceof z.ZodError){
@@ -154,7 +147,7 @@ export default function QrGenerate() {
                 <Input
                   id="name"
                   name="name"
-                  value={userData ? userData.name : ""}
+                  value={formData.name}
                   disabled
                   className="border-gray-300 focus:border-[#00aae7] focus:ring-[#00aae7]"
                 />
@@ -168,7 +161,7 @@ export default function QrGenerate() {
                   id="email"
                   name="email"
                   type="email"
-                  value={userData ? userData.name : ""}
+                  value={formData.email}
                   disabled
                   className="border-gray-300 focus:border-[#00aae7] focus:ring-[#00aae7]"
                 />
@@ -227,7 +220,15 @@ export default function QrGenerate() {
               <p className="text-center p-1 mt-2 text-miracle-darkGrey font-semibold text-sm">Please Save this QR code and get it scanned by the event coordinator to recieve the participation certificate.</p>
             </div>
           )}
-          <div onClick={() => setShowQr(false)} className="flex justify-center items-center text-white bg-miracle-darkBlue w-[180px] py-1 px-2 rounded-lg mx-auto">
+          <div onClick={() => {
+                  setFormData({
+                    name: "",
+                    event: "",
+                    email: "",
+                    image: "",
+                  })
+            setShowQr(false);
+          }} className="flex justify-center items-center text-white bg-miracle-darkBlue w-[180px] py-1 px-2 rounded-lg mx-auto">
             <ArrowLeft className="mr-1 h-5 w-5" /> Back
           </div>
         </CardContent>

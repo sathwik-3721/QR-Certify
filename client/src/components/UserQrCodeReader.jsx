@@ -51,6 +51,10 @@ export default function UserQrCodeReader({ handleUserData }) {
       setFetchingState("fetching details...");
       // alert(qrId)
       const result = await API.get.getUserDetails(qrId);
+      if(!result){
+        throw new Error("Details not found")
+      }
+      console.log(result)
       handleUserData(result);
     } catch (err) {
       console.log(err);
