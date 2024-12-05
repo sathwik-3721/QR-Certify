@@ -1,7 +1,7 @@
 import axios from "axios";
-const URL = import.meta.env.VITE_URL;
+// const URL = import.meta.env.VITE_URL;
 const QR_URL=import.meta.env.VITE_QR_URL;
-// const URL = window.origin;
+const URL = window.origin;
 export default {
   post: {
     register: async (data) => {
