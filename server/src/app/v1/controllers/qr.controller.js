@@ -1,104 +1,96 @@
-
 import dotenv from "dotenv";
-import Qr from "../models/qr.model.js";
+dotenv.config();
+// import Qr from "../models/qr.model.js";
 import { StatusCodes } from "http-status-codes";
 import nodemailer from "nodemailer";
-import { PDFDocument, rgb } from "pdf-lib";
+import multer from "multer";
+import { PDFDocument, rgb, StandardFonts } from "pdf-lib";
 import path from "path";
 import fs from "fs";
 import * as fontkit from 'fontkit';
-dotenv.config();
+
 
 // Middleware to handle file uploads
-export const uploadData = async (req, res) => {
-  try {
-    const { name, email, event, image } = req.body; // Get name and email from body
-    const result = await Qr.findOne({ name, email, event });
-    if (result) {
-      throw { status: StatusCodes.CONFLICT, message: "User already exists" };
-    }
-    const newQr = new Qr({
-      name,
-      email,
-      event,
-      image,
-    });
+// export const uploadData = async (req, res) => {
+//   try {
+//     const { name, email, event, image } = req.body; // Get name and email from body
+//     const result = await Qr.findOne({ name, email, event });
+//     if (result) {
+//       throw { status: StatusCodes.CONFLICT, message: "User already exists" };
+//     }
+//     const newQr = new Qr({
+//       name,
+//       email,
+//       event,
+//       image,
+//     });
 
-    await newQr.save(); // Save the document to MongoDB
-    return res
-      .status(StatusCodes.OK)
-      .send({ message: "Data uploaded successfully", newQr });
-  } catch (error) {
-    console.error("An error occurred in uploadData function:", error);
-    if (error.status) {
-      res.status(error.status).send(error.message);
-    } else {
-      res.status(StatusCodes.INTERNAL_SERVER_ERROR).send("An error occurred");
-    }
-  }
-};
+//     await newQr.save(); // Save the document to MongoDB
+//     return res
+//       .status(StatusCodes.OK)
+//       .send({ message: "Data uploaded successfully", newQr });
+//   } catch (error) {
+//     console.error("An error occurred in uploadData function:", error);
+//     if (error.status) {
+//       res.status(error.status).send(error.message);
+//     } else {
+//       res.status(StatusCodes.INTERNAL_SERVER_ERROR).send("An error occurred");
+//     }
+//   }
+// };
 
-const updateCertificateStatus = async (name, email, event) => {
-  try {
-    const response = await Qr.updateOne(
-      { name, email, event },
-      { $set: { issued: true } }
-    );
+// const updateCertificateStatus = async (name, email, event) => {
+//   try {
+//     const response = await Qr.updateOne(
+//       { name, email, event },
+//       { $set: { issued: true } }
+//     );
 
-    // Check if the update was successful
-    if (response.matchedCount === 0) {
-      throw {
-        status: 404, // Not Found
-        message: "No matching document found.",
-      };
-    }
+//     // Check if the update was successful
+//     if (response.matchedCount === 0) {
+//       throw {
+//         status: 404, // Not Found
+//         message: "No matching document found.",
+//       };
+//     }
 
-    if (response.modifiedCount === 0) {
-      throw {
-        status: 204, // No Content (document found but no changes made)
-        message: "Document found but no update made.",
-      };
-    }
+//     if (response.modifiedCount === 0) {
+//       throw {
+//         status: 204, // No Content (document found but no changes made)
+//         message: "Document found but no update made.",
+//       };
+//     }
 
-    return {
-      status: 200, // OK
-      message: "Certificate status updated successfully.",
-    };
-  } catch (err) {
-    // Catch any errors that occurred during the update
-    throw {
-      status: 500, // Internal Server Error
-      message: "An error occurred while updating the certificate status.",
-      error: err.message,
-    };
-  }
-};
+//     return {
+//       status: 200, // OK
+//       message: "Certificate status updated successfully.",
+//     };
+//   } catch (err) {
+//     // Catch any errors that occurred during the update
+//     throw {
+//       status: 500, // Internal Server Error
+//       message: "An error occurred while updating the certificate status.",
+//       error: err.message,
+//     };
+//   }
+// };
 
 const generatePdf = async (data) => {
-  const certificateImagePath = path.resolve("./TechTalks_Certificate.jpg");
+  const certificateImagePath = path.resolve("./certificate-bg2.png");
   
   const pdfDoc = await PDFDocument.create();
   pdfDoc.registerFontkit(fontkit);
-  // const fontBytes = await fetch("fonts/Montserrat-Regular.ttf").then((res) => res.arrayBuffer());
-  // const fontBytes = await loadFont('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap');
-  const fontBytes = fs.readFileSync('./fonts/Montserrat-Regular.ttf');  
-  const fontBoldBytes = fs.readFileSync('./fonts/Montserrat-Bold.ttf');
-  const alexFontBytes = fs.readFileSync('./fonts/AlexBrush-Regular.ttf');
-// Embed the custom font
+  const fontBytes = fs.readFileSync('./fonts/Montserrat-Medium.ttf');  
+  const fontBoldBytes = fs.readFileSync('./fonts/Montserrat-Bold.ttf');  
+
   const montserratFont = await pdfDoc.embedFont(fontBytes);
   const montserratBoldFont = await pdfDoc.embedFont(fontBoldBytes);
-  const alexBrushFont = await pdfDoc.embedFont(alexFontBytes)
 
-  // Embed the Roboto font
-  // const montserratFont = await pdfDoc.embedFont(StandardFonts.Helvetica);
-  // const montserratFont = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
+  const page = pdfDoc.addPage([1000, 650]); 
 
-  // Add a new page with landscape orientation
-  const page = pdfDoc.addPage([1000, 650]); // A4 size: [width, height]
 
-  // Set the background image
   const imageBuffer = fs.readFileSync(certificateImagePath);
-  const backgroundImage = await pdfDoc.embedJpg(imageBuffer);
+  const backgroundImage = await pdfDoc.embedPng(imageBuffer);
 
   page.drawImage(backgroundImage, {
     x: 0,
@@ -107,37 +99,36 @@ const generatePdf = async (data) => {
     height: page.getHeight(),
   });
 
-  // Draw name
+
   page.drawText(data.name, {
     x: page.getWidth() / 2 - montserratFont.widthOfTextAtSize(data.name, 30) / 2,
-    y: 395,
-    size: 50,
-    font: alexBrushFont,
-    color: rgb(1, 1, 1),
+    y: 405,
+    size: 30,
+    font: montserratFont,
+    color: rgb(0, 0, 0),
   });
 
-  // Draw certificate content
   const lineSegments = [
     { text: "Attended ", font: montserratFont, size: 18 },
-    { text: `${data.event}`, font: montserratBoldFont, size: 18 },
+    { text: `${data.event}`, font: montserratFont, size: 18 },
     { text: "in ", font: montserratFont, size: 18 },
     { text: "Digital Summit'24 ", font: montserratBoldFont, size: 18 }, // Bold text
     { text: "from ", font: montserratFont, size: 18 },
     { text: "December 19-21st, 2024", font: montserratBoldFont, size: 18 }, // Bold text
-    { text: " at Miracle City Vizianagaram (AP)", font: montserratFont, size: 18 },
+    { text: " at Miracle City", font: montserratFont, size: 18 },
+    { text: "Vizianagaram (AP)", font: montserratFont, size: 18 },
     {
-      text: '{"Generative AI", "Data and Analytics", "Cloud and Digital Applications", ',
+      text: '"Generative AI", "Data and Analytics", "Cloud and Digital Applications", ',
       font: montserratFont,
       size: 18,
     },
     {
-      text: '"Cybersecurity", "Automation", "IOT"}',
+      text: '"Cybersecurity", "Automation", "IOT"',
       font: montserratFont,
       size: 18,
     },
   ];
 
-  // Starting x position (you can adjust this based on the required alignment)
   let xPosition =
     (page.getWidth() -
       lineSegments
@@ -149,9 +140,8 @@ const generatePdf = async (data) => {
         )) /
     2;
 
-  let yPosition = 355; // Fixed y-position for all segments
+  let yPosition = 360; 
 
-  // Draw each segment in sequence on the same line
   let i = 0;
   for (const segment of lineSegments) {
     page.drawText(segment.text, {
@@ -163,12 +153,11 @@ const generatePdf = async (data) => {
       y: yPosition,
       size: segment.size,
       font: segment.font,
-      color: i >= 7 ? rgb(0.5, 0.5, 0.5) : rgb(1, 1, 1),
+      color: i >= 8 ? rgb(0.5, 0.5, 0.5) : rgb(0, 0, 0),
     });
 
-    // Move xPosition to the right for the next segment
     i < 2 || i >= 6
-      ? (yPosition -= 25)
+      ? (yPosition -= 30)
       : (xPosition += segment.font.widthOfTextAtSize(
           segment.text,
           segment.size
@@ -176,7 +165,6 @@ const generatePdf = async (data) => {
     i++;
   }
 
-  // Save the PDF
   const pdfBytes = await pdfDoc.save();
   // fs.writeFileSync('output.pdf', pdfBytes);
   return pdfBytes;
@@ -266,7 +254,7 @@ export const sendCertificate = async (req, res) => {
         console.log("Error Occurs", err);
         return res.status(StatusCodes.CONFLICT).send("could not send mail");
       } else {
-        // await updateCertificateStatus(name, email, event);
+        await updateCertificateStatus(name, email, event);
         console.log("Email sent successfully");
         return res.status(StatusCodes.OK).send("Send mail successfully");
       }
@@ -282,24 +270,24 @@ export const sendCertificate = async (req, res) => {
   }
 };
 
-export async function getDetails(req, res) {
-  try {
-    const { name, email, event } = req.query;
-    const result = await Qr.findOne({ name, email, event });
-    console.log(result);
-    if (result) {
-      return res.status(200).send(result);
-    }
-    // throw {status : 404 , message : "User details not found"}
-  } catch (error) {
-    console.error("An error occurred in uploadData function:", error);
-    if (error.status) {
-      res.status(error.status).send(error.message);
-    } else {
-      res.status(StatusCodes.INTERNAL_SERVER_ERROR).send("An error occurred");
-    }
-  }
-}
+// export async function getDetails(req, res) {
+//   try {
+//     const { name, email, event } = req.query;
+//     const result = await Qr.findOne({ name, email, event });
+//     console.log(result);
+//     if (result) {
+//       return res.status(200).send(result);
+//     }
+//     // throw {status : 404 , message : "User details not found"}
+//   } catch (error) {
+//     console.error("An error occurred in uploadData function:", error);
+//     if (error.status) {
+//       res.status(error.status).send(error.message);
+//     } else {
+//       res.status(StatusCodes.INTERNAL_SERVER_ERROR).send("An error occurred");
+//     }
+//   }
+// }
 
 export async function test(req, res) {
   res.status(StatusCodes.OK).send("test successfully");

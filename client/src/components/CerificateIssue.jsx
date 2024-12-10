@@ -109,6 +109,7 @@ export default function CerificateIssue() {
     } catch (err) {
       console.log(err);
       toast({
+        variant: "destructive",
         title: "Failed to send Mail",
         duration: 2000,
       });
@@ -192,7 +193,7 @@ export default function CerificateIssue() {
         <CardContent className="space-y-4 p-0 min-w-full">
 
             {formData.email !== "" && (
-            <div className="flex flex-col justify-center h-[350px]">
+            <div className="flex flex-col justify-center h-[350px] px-1">
                 <div className="flex justify-center items-center">
                 <img
                     src={userLogo}

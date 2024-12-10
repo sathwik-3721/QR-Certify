@@ -5,7 +5,6 @@ import path from "path";
 import fs from "fs";
 import * as fontkit from 'fontkit';
 import dotenv from "dotenv";
-
 dotenv.config();
 
 
@@ -270,20 +269,29 @@ const sendCertificate = async (details) => {
         to: email,
         subject: "Participation Certificate",
         html,
-        attachments: [
-          {
-            filename: "Participation-Certificate.pdf", // Name the file
-            content: certificateBytes,
-          },
-        ],
+        // attachments: [
+        //   {
+        //     filename: "Participation-Certificate.pdf", // Name the file
+        //     content: certificateBytes,
+        //   },
+        // ],
       };
   
       const mailTransporter = nodemailer.createTransport({
         service: "gmail",
+        requireTLS:false,
+        port : 587,
+        secure : false,
+        logger:true,
+        debug:true,
         auth: {
           user: process.env.APP_MAIL_USER,
           pass: process.env.APP_MAIL_PASSWORD,
         },
+        tls : {
+          rejectUnauthorized : false
+        },
+
       });
   
       mailTransporter.sendMail(mailDetails, async function (err, data) {
@@ -299,11 +307,7 @@ const sendCertificate = async (details) => {
       // return res.status(200).send("mail sent")
     } catch (error) {
       console.error("An error occurred in uploadData function:", error);
-      if (error.status) {
-        res.status(error.status).send(error.message);
-      } else {
-        res.status(StatusCodes.INTERNAL_SERVER_ERROR).send("An error occurred");
-      }
+
     }
   };
 
@@ -314,5 +318,5 @@ const details = {
 }
 
 // generatePdf(details);
-// sendCertificate(details);
+sendCertificate(details);
 console.log(process.env.APP_MAIL_USER)
