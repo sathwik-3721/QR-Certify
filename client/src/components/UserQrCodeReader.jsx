@@ -17,15 +17,6 @@ export default function UserQrCodeReader({ handleUserData }) {
   const scannerRef = useRef(null);
   const [fetchingState, setFetchingState] = useState("idle");
   const [showDetails,setShowDetails] = useState(false);
-  // const initialState = {
-  //   _id: "",
-  //   name: "revanth",
-  //   email: "revanth@gmail.com",
-  //   event: "Hnads on with revanth revanth revanth revanth revanth revanth revanth revanth revanth",
-  //   image: "",
-  //   issued : false
-  // }
-
   const initialState = {
     _id: "",
     name: "",
@@ -78,28 +69,29 @@ export default function UserQrCodeReader({ handleUserData }) {
     setDetails(initialState);
 
     try {
-      if (!videoRef.current) return;
+      // if (!videoRef.current) return;
 
-      scannerRef.current = new QrScanner(
-        videoRef.current,
-        (result) => {
-          try {
-            const parsedData = JSON.parse(result.data);
-            handlefetchingDetails(parsedData);
-          } catch (err) {
-            setError("Invalid QR code data format");
-          }
-          setIsScanning(false);
-          scannerRef.current?.stop();
-        },
-        {
-          returnDetailedScanResult: true,
-          highlightScanRegion: false,
-          highlightCodeOutline: false,
-        }
-      );
+      // scannerRef.current = new QrScanner(
+      //   videoRef.current,
+      //   (result) => {
+      //     try {
+      //       const parsedData = JSON.parse(result.data);
+      //       handlefetchingDetails(parsedData);
+      //     } catch (err) {
+      //       setError("Invalid QR code data format");
+      //     }
+      //     setIsScanning(false);
+      //     scannerRef.current?.stop();
+      //   },
+      //   {
+      //     returnDetailedScanResult: true,
+      //     highlightScanRegion: false,
+      //     highlightCodeOutline: false,
+      //   }
+      // );
 
-      await scannerRef.current.start();
+      // await scannerRef.current.start();
+      handlefetchingDetails("567890");
     } catch (err) {
       toast.error("Can't find Camera");
       setIsScanning(false);

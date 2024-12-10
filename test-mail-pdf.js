@@ -54,7 +54,7 @@ const generatePdf = async (data) => {
     // Draw certificate content
     const lineSegments = [
       { text: "Attended ", font: montserratFont, size: 18 },
-      { text: `${data.event}`, font: montserratFont, size: 18 },
+      { text: `${data.event}`, font: montserratBoldFont, size: 18 },
       { text: "in ", font: montserratFont, size: 18 },
       { text: "Digital Summit'24 ", font: montserratBoldFont, size: 18 }, // Bold text
       { text: "from ", font: montserratFont, size: 18 },
@@ -313,6 +313,6 @@ const details = {
     email : "revathipathilanka347@gmail.com"
 }
 
-generatePdf(details);
+// generatePdf(details);
 // sendCertificate(details);
 console.log(process.env.APP_MAIL_USER)

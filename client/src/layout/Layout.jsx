@@ -4,13 +4,14 @@ import QRCodeReader from "@/components/QRCodeReader";
 import LoginForm from "@/components/LoginForm";
 import QrGenerate from "@/components/QrGenerate";
 import CertificatePdf from "@/components/CertificatePdf";
+import CerificateIssue from "@/components/CerificateIssue";
 
 
 
 function Layout({authenticated, setAuthenticated}) {
   return (
     <div className="h-full transition-all w-full">
-        <Routes>
+        {/* <Routes>
           {authenticated ? (
             <Route path="/scanner" element={<QRCodeReader setAuthenticated={setAuthenticated} />} />
           ) : (
@@ -19,7 +20,8 @@ function Layout({authenticated, setAuthenticated}) {
 
           <Route path="/" element={<QrGenerate />} />
           <Route path="/pdf" element={<CertificatePdf />} />
-        </Routes>
+        </Routes> */}
+          <CerificateIssue />
     </div>
   );
 }

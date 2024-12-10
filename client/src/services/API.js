@@ -1,7 +1,7 @@
 import axios from "axios";
-// const URL = import.meta.env.VITE_URL;
+const URL = import.meta.env.VITE_URL;
 const QR_URL=import.meta.env.VITE_QR_URL;
-const URL = window.origin;
+// const URL = window.origin;
 export default {
   post: {
     register: async (data) => {
@@ -36,9 +36,14 @@ export default {
     },
     getUserDetails : async (qrId) => {
       try {
-        const response = await axios.get(`${QR_URL}/${qrId}`);
+        // const response = await axios.get(`${QR_URL}/${qrId}`);
         
-        return response.data.data[0];
+        // return response.data.data[0];
+        return {
+          FirstName : "Revanth",
+          LastName : "Lanka",
+          Email : "revathipathilanka347@gmail.com"
+        }
       } catch (err) {
         throw err;
       }

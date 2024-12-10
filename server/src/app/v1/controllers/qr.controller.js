@@ -1,13 +1,13 @@
 
 import dotenv from "dotenv";
-dotenv.config();
 import Qr from "../models/qr.model.js";
 import { StatusCodes } from "http-status-codes";
 import nodemailer from "nodemailer";
-import multer from "multer";
-import { PDFDocument, rgb, StandardFonts } from "pdf-lib";
+import { PDFDocument, rgb } from "pdf-lib";
 import path from "path";
 import fs from "fs";
+import * as fontkit from 'fontkit';
+dotenv.config();
 
 // Middleware to handle file uploads
 export const uploadData = async (req, res) => {
@@ -75,21 +75,30 @@ const updateCertificateStatus = async (name, email, event) => {
 };
 
 const generatePdf = async (data) => {
-  const certificateImagePath = path.resolve("./certificate-bg2.png");
+  const certificateImagePath = path.resolve("./TechTalks_Certificate.jpg");
   
   const pdfDoc = await PDFDocument.create();
   pdfDoc.registerFontkit(fontkit);
-  const fontBytes = fs.readFileSync('./fonts/Montserrat-Medium.ttf');  
-  const fontBoldBytes = fs.readFileSync('./fonts/Montserrat-Bold.ttf');  
-
+  // const fontBytes = await fetch("fonts/Montserrat-Regular.ttf").then((res) => res.arrayBuffer());
+  // const fontBytes = await loadFont('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap');
+  const fontBytes = fs.readFileSync('./fonts/Montserrat-Regular.ttf');  
+  const fontBoldBytes = fs.readFileSync('./fonts/Montserrat-Bold.ttf');
+  const alexFontBytes = fs.readFileSync('./fonts/AlexBrush-Regular.ttf');
+// Embed the custom font
   const montserratFont = await pdfDoc.embedFont(fontBytes);
   const montserratBoldFont = await pdfDoc.embedFont(fontBoldBytes);
+  const alexBrushFont = await pdfDoc.embedFont(alexFontBytes)
 
-  const page = pdfDoc.addPage([1000, 650]); 
+  // Embed the Roboto font
+  // const montserratFont = await pdfDoc.embedFont(StandardFonts.Helvetica);
+  // const montserratFont = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
 
+  // Add a new page with landscape orientation
+  const page = pdfDoc.addPage([1000, 650]); // A4 size: [width, height]
 
+  // Set the background image
   const imageBuffer = fs.readFileSync(certificateImagePath);
-  const backgroundImage = await pdfDoc.embedPng(imageBuffer);
+  const backgroundImage = await pdfDoc.embedJpg(imageBuffer);
 
   page.drawImage(backgroundImage, {
     x: 0,
@@ -98,36 +107,37 @@ const generatePdf = async (data) => {
     height: page.getHeight(),
   });
 
-
+  // Draw name
   page.drawText(data.name, {
     x: page.getWidth() / 2 - montserratFont.widthOfTextAtSize(data.name, 30) / 2,
-    y: 405,
-    size: 30,
-    font: montserratFont,
-    color: rgb(0, 0, 0),
+    y: 395,
+    size: 50,
+    font: alexBrushFont,
+    color: rgb(1, 1, 1),
   });
 
+  // Draw certificate content
   const lineSegments = [
     { text: "Attended ", font: montserratFont, size: 18 },
-    { text: `${data.event}`, font: montserratFont, size: 18 },
+    { text: `${data.event}`, font: montserratBoldFont, size: 18 },
     { text: "in ", font: montserratFont, size: 18 },
     { text: "Digital Summit'24 ", font: montserratBoldFont, size: 18 }, // Bold text
     { text: "from ", font: montserratFont, size: 18 },
     { text: "December 19-21st, 2024", font: montserratBoldFont, size: 18 }, // Bold text
-    { text: " at Miracle City", font: montserratFont, size: 18 },
-    { text: "Vizianagaram (AP)", font: montserratFont, size: 18 },
+    { text: " at Miracle City Vizianagaram (AP)", font: montserratFont, size: 18 },
     {
-      text: '"Generative AI", "Data and Analytics", "Cloud and Digital Applications", ',
+      text: '{"Generative AI", "Data and Analytics", "Cloud and Digital Applications", ',
       font: montserratFont,
       size: 18,
     },
     {
-      text: '"Cybersecurity", "Automation", "IOT"',
+      text: '"Cybersecurity", "Automation", "IOT"}',
       font: montserratFont,
       size: 18,
     },
   ];
 
+  // Starting x position (you can adjust this based on the required alignment)
   let xPosition =
     (page.getWidth() -
       lineSegments
@@ -139,8 +149,9 @@ const generatePdf = async (data) => {
         )) /
     2;
 
-  let yPosition = 360; 
+  let yPosition = 355; // Fixed y-position for all segments
 
+  // Draw each segment in sequence on the same line
   let i = 0;
   for (const segment of lineSegments) {
     page.drawText(segment.text, {
@@ -152,11 +163,12 @@ const generatePdf = async (data) => {
       y: yPosition,
       size: segment.size,
       font: segment.font,
-      color: i >= 8 ? rgb(0.5, 0.5, 0.5) : rgb(0, 0, 0),
+      color: i >= 7 ? rgb(0.5, 0.5, 0.5) : rgb(1, 1, 1),
     });
 
+    // Move xPosition to the right for the next segment
     i < 2 || i >= 6
-      ? (yPosition -= 30)
+      ? (yPosition -= 25)
       : (xPosition += segment.font.widthOfTextAtSize(
           segment.text,
           segment.size
@@ -164,12 +176,11 @@ const generatePdf = async (data) => {
     i++;
   }
 
+  // Save the PDF
   const pdfBytes = await pdfDoc.save();
   // fs.writeFileSync('output.pdf', pdfBytes);
   return pdfBytes;
 };
-
-
 
 export const sendCertificate = async (req, res) => {
   try {
@@ -255,7 +266,7 @@ export const sendCertificate = async (req, res) => {
         console.log("Error Occurs", err);
         return res.status(StatusCodes.CONFLICT).send("could not send mail");
       } else {
-        await updateCertificateStatus(name, email, event);
+        // await updateCertificateStatus(name, email, event);
         console.log("Email sent successfully");
         return res.status(StatusCodes.OK).send("Send mail successfully");
       }
