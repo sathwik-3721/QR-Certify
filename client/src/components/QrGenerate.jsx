@@ -1,163 +1,242 @@
-import React, { useState, useRef } from 'react';
-import { Button } from '@/components/ui/button'; 
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import React, { useState, useRef } from "react";
+import { Button } from "@/components/ui/button";
+import { Loader2,Upload,QrCodeIcon, ArrowLeft } from "lucide-react";
+import {
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { QRCodeSVG } from 'qrcode.react';
-import API from '@/services/API';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { QRCodeSVG } from "qrcode.react";
+import API from "@/services/API";
+import { ToastContainer, toast } from "react-toastify";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
+import miracleLogo from '../assets/miracle.png'
+import UserQrCodeReader from "./UserQrCodeReader";
+
+const registerSchema = z.object({
+  name: z.string().min(1, "Name is required"),   
+  event: z.string().refine((val) => val !== "",{message : "Please select an event"}), 
+  email: z.string().email("Invalid email address"), 
+});
 
 export default function QrGenerate() {
   const [formData, setFormData] = useState({
-    name: '',
-    event: '',
-    email: '',
-    image: '',
+    name: "",
+    event: "",
+    email: "",
+    image: "",
   });
-  const [qrCodeData, setQRCodeData] = useState('');
+  const [qrCodeData, setQRCodeData] = useState("");
   const fileInputRef = useRef(null);
-  const [error,setError] = useState(null);
-  const [uploadedImage,setUploadedImage] = useState(null);
+  const [isLoading,setIsLoading] = useState(false)
+  const [errors,setErrors] = useState({})
+  const [showQr,setShowQr] = useState(false)
+  const events = [
+    "Hands-On with Google AI Studio: From Gemini Models to Advanced Prompting",
+    "Integrating Gemini APIs with Python and Building a Chatbot App with Streamlit/Chainlit UI",
+    "Building Conversational Chatbots with Dialogflow CX",
+    "Building a Custom Search Engine with Google Programmable Search API",
+    "Building a Real-Time Live Chat Application with Socket.IO and MERN Stack",
+    "Custom Vision AI Object Detection for CAD Images using Azure Service",
+    "Deploying Applications Using Jenkins CICD Pipelines",
+    "Building a MERN Stack Web App: From CRUD APIs to React Integration"
+  ];
+  const [userData,setUserData] = useState(null)
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    setErrors({...errors,[name] : null})
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleSelectChange = (value) => {
-    setFormData(prev => ({ ...prev, event: value }));
+    setErrors({...errors,event : null})
+    setFormData((prev) => ({ ...prev, event: value }));
   };
 
-  const handleFileChange = (e) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setFormData(prev => ({ ...prev, image: reader.result }));
-      };
-      reader.readAsDataURL(file);
-    }
-  };
+  const handleUserData = (data) => {
+    setFormData((prev) => ({ ...prev, name: data.FirstName+" "+data.LastName,email : data.Email }))
+  }
 
+  // const handleFileChange = (e) => {
+  //   const file = e.target.files?.[0];
+  //   console.log(file.type)
+  //   if (file && file.type.includes("image")) {
+  //     const reader = new FileReader();
+  //     reader.onloadend = () => {
+  //       setFormData((prev) => ({ ...prev, image: reader.result }));
+  //     };
+  //     reader.readAsDataURL(file);
+  //   }
+  //   else{
+  //     toast.error("Select Image only")
+  //   }
+  // };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    try{
-      // const data = createFormData();
-      console.log(formData)
+    const formDataToValidate = {
+      name: formData.name,
+      event: formData.event,
+      email: formData.email,
+    };
+    try {
+      setErrors({})
+      setIsLoading(true);
+      registerSchema.parse(formDataToValidate);
       const result = await API.post.register(formData);
-      console.log(result)
-      setUploadedImage(result.newQr.image);
-      // setImgUrl(result.newQr.image.data)
+      console.log(result);
       let { image, ...rest } = formData;
       const dataString = JSON.stringify(rest);
       setQRCodeData(dataString);
+      setShowQr(true);
+    } catch (err) {
+      if(err instanceof z.ZodError){
+        const formattedErrors = err.errors.reduce((acc, error) => {
+          acc[error.path[0]] = error.message;
+          return acc;
+        }, {});
+  
+        setErrors(formattedErrors);  
+        console.error("Validation failed:", formattedErrors);
+      }
+      else if(err.response && err.response.status === 409){
+        toast.error("User already registered");
+      }
+      else{
+          toast.error("Failed to generate QR");
+      }
     }
-    catch(err){
-      setError(err)
-      console.log(err)
+    finally{
+      setIsLoading(false);
     }
-    
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 flex items-center justify-center p-4">
-      <Card className="w-full max-w-md shadow-lg">
-        <CardHeader className="bg-[#00aae7] text-white">
-          <CardTitle className="text-2xl font-bold text-center">QR Code Generator</CardTitle>
+    formData.name === ""
+    ? <UserQrCodeReader handleUserData={handleUserData} />
+    : <div className="h-full flex md:items-center md:justify-center">
+      <ToastContainer />
+      <Card className={`w-full relative max-w-md rounded-xl h-full border-0 shadow-none overflow-hidden`}>
+        <CardHeader className="text-white rounded-t-xl mt-3 p-2 md:mt-0">
+          <div className="text-center mb-5 flex justify-center"><img src={miracleLogo} width={150} alt="miracle" /></div>
+          
+          <CardTitle className="text-2xl font-bold text-center text-miracle-darkBlue">
+            Digital Summit 2024 Certificate Registration
+          </CardTitle>
         </CardHeader>
-        <CardContent className="mt-6">
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="name" className="text-gray-700">Name</Label>
-              <Input 
-                id="name" 
-                name="name" 
-                value={formData.name} 
-                onChange={handleInputChange} 
-                required 
-                className="border-gray-300 focus:border-[#00aae7] focus:ring-[#00aae7]"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="demo" className="text-gray-700">Demo</Label>
-              <Select 
-                value={formData.event} 
-                onValueChange={handleSelectChange}
-              >
-                <SelectTrigger id="event" className="border-gray-300 focus:border-[#00aae7] focus:ring-[#00aae7]">
-                  <SelectValue placeholder="Select a event" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="Tech Talks">Tech Talks</SelectItem>
-                  <SelectItem value="Hands on">Hands on</SelectItem>
-                  <SelectItem value="Demos">Demos</SelectItem>
-                  <SelectItem value="Quiz">Quiz</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="email" className="text-gray-700">Email</Label>
-              <Input 
-                id="email" 
-                name="email" 
-                type="email" 
-                value={formData.email} 
-                onChange={handleInputChange} 
-                required 
-                className="border-gray-300 focus:border-[#00aae7] focus:ring-[#00aae7]"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="profilePicture" className="text-gray-700">Profile Picture</Label>
-              <Input 
-                id="profilePicture" 
-                name="profilePicture" 
-                type="file" 
-                accept="image/*"
-                onChange={handleFileChange}
-                ref={fileInputRef}
-                className="hidden"
-              />
-              <Button 
-                type="button" 
-                onClick={() => fileInputRef.current?.click()}
-                className="w-full bg-[#2368a0] hover:bg-[#1c5280] text-white"
-              >
-                Upload Profile Picture
-              </Button>
-              {formData.image !== '' && (
-                <div className="mt-2 flex justify-center">
-                  <img 
-                    src={formData.image} 
-                    alt="Profile" 
-                    className="w-32 h-32 object-cover rounded-full border-4 border-[#00aae7]"
-                  />
-                </div>
-              )}
-            </div>
-            <Button type="submit" className="w-full bg-[#00aae7] hover:bg-[#0088b9] text-white">
-              Generate QR Code
-            </Button>
-          </form>
+        <div className={`flex transition-transform duration-500 ease-in-out min-w-full ${showQr ? "-translate-x-full" : "translate-x-0"}`}>
+        <CardContent className={`md:px-4 p-2 min-w-full mt-5`}>
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="name" className="text-gray-700">
+                  Full Name
+                </Label>
+                <Input
+                  id="name"
+                  name="name"
+                  value={formData.name}
+                  disabled
+                  className="border-gray-300 focus:border-[#00aae7] focus:ring-[#00aae7]"
+                />
+                {errors.name && <p className="text-miracle-red text-sm">{errors.name}</p>}
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="email" className="text-gray-700">
+                  Email
+                </Label>
+                <Input
+                  id="email"
+                  name="email"
+                  type="email"
+                  value={formData.email}
+                  disabled
+                  className="border-gray-300 focus:border-[#00aae7] focus:ring-[#00aae7]"
+                />
+                {errors.email && <p className="text-miracle-red text-sm">{errors.email}</p>}
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="demo" className="text-gray-700">
+                  Hands-On
+                </Label>
+                <Select
+                  value={formData.event}
+                  onValueChange={handleSelectChange}
+                >
+                  <SelectTrigger
+                    id="event"
+                    className="border-gray-300 focus:border-[#00aae7] focus:ring-[#00aae7]"
+                  >
+                    <SelectValue placeholder="Select a Hands-On Session" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {
+                      events.map((event,indx) => <SelectItem key={indx} value={event}>{event}</SelectItem>)
+                    }
+                  </SelectContent>
+                </Select>
+                {errors.event && <p className="text-miracle-red text-sm">{errors.event}</p>}
+              </div>
+
+              {
+                isLoading
+                ? <Button className="w-full bg-miracle-darkBlue hover:bg-miracle-darkBlue" disabled>
+                    <Loader2 className="mr-1 h-4 w-4 animate-spin" />
+                    Generating...
+                  </Button>
+                : <Button
+                    type="submit"
+                    className="w-full bg-[#0d416b] hover:bg-miracle-darkBlue/90 text-white"
+                  >
+                    <QrCodeIcon className="h-5 w-5 font-bold" /> Generate QR Code
+                  </Button>
+              }
+              
+            </form>
         </CardContent>
-        <CardFooter className="flex justify-center">
+        <CardContent className="md:px-4 p-2 min-w-full">
           {qrCodeData && (
-            <div className="mt-4">
-              <QRCodeSVG 
-                value={qrCodeData} 
-                size={200} 
+            <div className="w-full h-[400px] flex flex-col justify-center items-center">
+              <QRCodeSVG
+                value={qrCodeData}
+                size={200}
                 level="H"
                 includeMargin={true}
                 bgColor="#ffffff"
-                fgColor="#00aae7"
+                fgColor="#232527"
               />
+              <p className="text-center p-1 mt-2 text-miracle-darkGrey font-semibold text-sm">Please Save this QR code and get it scanned by the event coordinator to recieve the participation certificate.</p>
             </div>
           )}
-          {
-            error && <p className='text-red-500'>Error sending data</p>
-          }
-        </CardFooter>
+          <div onClick={() => {
+                  setFormData({
+                    name: "",
+                    event: "",
+                    email: "",
+                    image: "",
+                  })
+            setShowQr(false);
+          }} className="flex justify-center items-center text-white bg-miracle-darkBlue w-[180px] py-1 px-2 rounded-lg mx-auto">
+            <ArrowLeft className="mr-1 h-5 w-5" /> Back
+          </div>
+        </CardContent>
+        </div>
+
+        <div className="w-full flex items-center justify-center text-sm text-gray-500 absolute bottom-0">
+          Made with ❤️ at Miracle Labs
+        </div>
       </Card>
     </div>
   );

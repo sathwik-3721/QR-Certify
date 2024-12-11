@@ -1,32 +1,38 @@
-import connectDB from '../utils/dbConnection.js';
-import mongoose from 'mongoose';
+// import connectDB from '../utils/dbConnection.js';
 
-// Define the schema
-const qrSchema = new mongoose.Schema({
-  name: {
-    type: String,
-    required: true,
-    trim: true,
-  },
-  email: {
-    type: String,
-    required: true,
-    unique: true,
-    lowercase: true,
-    trim: true,
-  },
-  image: {
-    type: String, // Use Buffer to store binary data like a Blob
-    required: false,
-  },
-  event: {
-    type: String,
-    required: true,
-    trim: true,
-  },
-});
+// import mongoose from 'mongoose';
 
-// Create a model from the schema
-const Qr = mongoose.model('Qr', qrSchema);
+// // Define the schema
+// const qrSchema = new mongoose.Schema({
+//   name: {
+//     type: String,
+//     required: true,
+//     trim: true,
+//   },
+//   email: {
+//     type: String,
+//     required: true,
+//     lowercase: true,
+//     trim: true,
+//   },
+//   image: {
+//     type: String, // to store base64 image
+//     required: false,
+//   },
+//   event: {
+//     type: String,
+//     required: true,
+//     trim: true,
+//   },
+//   issued : {
+//     type : Boolean,
+//     default : false,
+//   }
+// });
 
-export default Qr;
+// qrSchema.index({ name: 1, email: 1, event : 1 }, { unique: true });
+
+// // Create a model from the schema
+// const Qr = mongoose.model('Qr', qrSchema);
+
+// export default Qr;
